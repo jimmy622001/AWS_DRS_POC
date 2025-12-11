@@ -43,7 +43,7 @@ This enterprise-grade disaster recovery (DR) solution is specifically designed f
 
 ### Option 1: AWS DRS with VPN
 
-![AWS DRS with VPN Architecture](https://d1.awsstatic.com/product-marketing/CloudEndure/CloudEndureDRDiagram.78c10efbc9be0e086d6c496e54efb0b70513b1af.png)
+![DR AWS.png](docs/DR%20AWS.png)
 
 A secure, cost-effective solution using AWS Elastic Disaster Recovery Service (DRS) with VPN connectivity for replication and access:
 
