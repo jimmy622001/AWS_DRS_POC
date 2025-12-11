@@ -1,13 +1,10 @@
-# Main AWS provider for primary region (Ireland)
+# Main AWS provider
 provider "aws" {
-  region = var.aws_region  # eu-west-1 (Ireland)
+  region = var.aws_region
 }
 
-# Failover region provider (not actively used until failover)
-provider "aws" {
-  alias  = "failover"
-  region = var.failover_region  # eu-west-2 (London)
-}
+# Data source to get AWS account ID
+data "aws_caller_identity" "current" {}
 
 # Networking Module
 module "networking" {
@@ -66,12 +63,73 @@ module "compute" {
   create_load_balancer = var.create_load_balancer
 }
 
+# KMS Module for encryption
+module "kms" {
+  source = "./modules/kms"
+
+  prefix      = "${var.project}-${var.environment}"
+  description = "KMS key for ${var.project} ${var.environment} environment"
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+# Secrets Manager Module
+module "secrets_manager" {
+  source = "./modules/secrets_manager"
+
+  secrets = {
+    "db_password"   = var.db_password
+    "ad_password"   = var.ad_password
+    "vpn_password"  = var.vpn_password
+  }
+
+  kms_key_id = module.kms.key_id
+  prefix     = "${var.project}-${var.environment}"
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+# Security Module
+module "security" {
+  source = "./modules/security"
+
+  vpc_id     = module.networking.vpc_id
+  subnet_ids = module.networking.private_subnet_ids
+  allowed_ips = var.allowed_ips  # This should be specified with your IP
+  prefix     = "${var.project}-${var.environment}"
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+# IAM Module
+module "iam" {
+  source = "./modules/iam"
+
+  prefix     = "${var.project}-${var.environment}"
+  account_id = data.aws_caller_identity.current.account_id
+  kms_key_arn = module.kms.key_arn
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
 # Database Module
 module "database" {
   source = "./modules/database"
 
   subnet_ids             = module.networking.private_subnet_ids
-  security_group_ids     = [module.networking.security_group_id]
+  security_group_ids     = [module.security.security_group_id]
   dr_activated           = var.dr_activated
   create_sql_server      = var.create_sql_server
   create_mysql           = var.create_mysql
@@ -86,10 +144,11 @@ module "database" {
   mysql_instance_class   = var.mysql_instance_class
   dms_instance_class     = var.dms_instance_class
   db_username            = var.db_username
-  db_password            = var.db_password
+  db_password            = module.secrets_manager.secret_arns["db_password"]
   db_family              = var.db_family
   multi_az               = var.multi_az
   backup_retention_days  = var.backup_retention_days
+  kms_key_id             = module.kms.key_id
 }
 
 # Storage Module
@@ -102,13 +161,14 @@ module "storage" {
   fsx_throughput_capacity    = var.fsx_throughput_capacity
   ad_dns_ips                 = var.ad_dns_ips
   ad_domain_name             = var.ad_domain_name
-  ad_password                = var.ad_password
+  ad_password                = module.secrets_manager.secret_arns["ad_password"]
   ad_username                = var.ad_username
   ad_ou_path                 = var.ad_ou_path
   s3_bucket_name             = var.s3_bucket_name
   storage_gateway_role_arn   = var.storage_gateway_role_arn
   datasync_role_arn          = var.datasync_role_arn
   datasync_source_location_arn = var.datasync_source_location_arn
+  kms_key_id                 = module.kms.key_id
 }
 
 # DRS Module
@@ -117,7 +177,7 @@ module "drs" {
 
   vpc_id                    = module.networking.vpc_id
   subnet_ids                = module.networking.private_subnet_ids
-  security_group_ids        = [module.networking.security_group_id]
+  security_group_ids        = [module.security.security_group_id]
   dr_activated              = var.dr_activated
   app_server_count          = var.app_server_count
   db_server_count           = var.db_server_count
@@ -130,9 +190,14 @@ module "drs" {
   app_server_source_ids     = var.app_server_source_ids
   db_server_source_ids      = var.db_server_source_ids
   file_server_source_ids    = var.file_server_source_ids
-  app_server_source_ids     = var.app_server_source_ids
-  db_server_source_ids      = var.db_server_source_ids
-  file_server_source_ids    = var.file_server_source_ids
+  kms_key_id                = module.kms.key_id
+  instance_profile_name     = module.iam.drs_instance_profile_name
+  prefix                    = "${var.project}-${var.environment}"
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
 }
 
 # Monitoring Module
@@ -144,4 +209,36 @@ module "monitoring" {
   replication_lag_threshold_seconds = var.replication_lag_threshold_seconds
   rto_threshold_minutes        = var.rto_threshold_minutes
   sns_topic_arn                = var.sns_topic_arn
+  kms_key_id                   = module.kms.key_id
+}
+
+# Security Compliance Module
+module "security_compliance" {
+  source = "./modules/security_compliance"
+
+  prefix     = "${var.project}-${var.environment}"
+  account_id = data.aws_caller_identity.current.account_id
+  region     = var.aws_region
+  kms_key_id = module.kms.key_id
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+# Logging Module
+module "logging" {
+  source = "./modules/logging"
+
+  prefix     = "${var.project}-${var.environment}"
+  account_id = data.aws_caller_identity.current.account_id
+  kms_key_id = module.kms.key_id
+  vpc_id     = module.networking.vpc_id
+  admin_email = var.admin_email
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
 }

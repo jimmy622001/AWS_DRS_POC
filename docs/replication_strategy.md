@@ -156,8 +156,9 @@ Optimizing Replication Traffic:
    - Consider WAN optimization appliances for additional efficiency
 
 3. Private Network Paths:
-   - Route all replication traffic through the Site-to-Site VPN
+   - Route all replication traffic through the Site-to-Site VPN or Direct Connect
    - Avoid use of public endpoints where possible
+   - Utilize multiple AZs within the region for resilience
 
 Compliance and Security Considerations
 

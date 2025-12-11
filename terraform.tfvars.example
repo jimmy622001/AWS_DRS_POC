@@ -83,8 +83,6 @@ replication_lag_threshold_seconds = 3600
 rto_threshold_minutes = 60
 sns_topic_arn = "arn:aws:sns:eu-west-1:ACCOUNT_ID:topic-name"
 
-# Failover region settings (London)
-# When implementing actual failover, you would update aws_region to eu-west-2
-# and availability_zones to eu-west-2 values
-failover_region = "eu-west-2"  # Failover region: London
-failover_availability_zones = ["eu-west-2a", "eu-west-2b"]
+# Single-region DR solution
+# This solution is configured as a DR for on-premises workloads
+# and does not require cross-region failover

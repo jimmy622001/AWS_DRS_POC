@@ -4,11 +4,26 @@ variable "aws_region" {
   type        = string
 }
 
-variable "failover_region" {
-  description = "AWS failover region for disaster recovery"
-  type        = string
-  default     = "eu-west-2"  # London
+variable "allowed_ips" {
+  description = "List of CIDR blocks allowed to access resources (your IP)"
+  type        = list(string)
+  default     = ["0.0.0.0/0"] # This should be replaced with your specific IP
 }
+
+variable "admin_email" {
+  description = "Email address for security notifications"
+  type        = string
+  default     = "admin@example.com" # Replace with your email
+}
+
+variable "vpn_password" {
+  description = "Password for VPN connections"
+  type        = string
+  sensitive   = true
+  default     = "ChangeMeToSecurePassword" # Should be replaced in a secure manner
+}
+
+# Removed failover_region variable - no cross-region DR needed
 
 variable "dr_activated" {
   description = "Boolean flag to indicate if DR is activated (for cost calculation)"
@@ -36,11 +51,7 @@ variable "availability_zones" {
   type        = list(string)
 }
 
-variable "failover_availability_zones" {
-  description = "List of availability zones to use in failover region"
-  type        = list(string)
-  default     = ["eu-west-2a", "eu-west-2b"]  # London AZs
-}
+# Removed failover_availability_zones variable - no cross-region DR needed
 
 variable "create_nat_gateway" {
   description = "Flag to determine if a NAT Gateway should be created"

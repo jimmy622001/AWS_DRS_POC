@@ -1,3 +1,15 @@
+variable "prefix" {
+  description = "Prefix for resource names"
+  type        = string
+  default     = "bank-dr"
+}
+
+variable "tags" {
+  description = "Tags to apply to DRS resources"
+  type        = map(string)
+  default     = {}
+}
+
 variable "vpc_id" {
   description = "VPC ID for the DRS source network"
   type        = string
@@ -64,6 +76,52 @@ variable "db_server_instance_type" {
 variable "file_server_instance_type" {
   description = "EC2 instance type for recovered file servers"
   type        = string
+}
+
+variable "kms_key_id" {
+  description = "KMS key ID for encryption"
+  type        = string
+}
+
+variable "instance_profile_name" {
+  description = "IAM instance profile name for DRS instances"
+  type        = string
+}
+
+variable "app_server_ami_id" {
+  description = "AMI ID for app servers"
+  type        = string
+  default     = "ami-0a3c3a20c09d6f377" # Default to Amazon Linux 2
+}
+
+variable "db_server_ami_id" {
+  description = "AMI ID for database servers"
+  type        = string
+  default     = "ami-0a3c3a20c09d6f377" # Default to Amazon Linux 2
+}
+
+variable "file_server_ami_id" {
+  description = "AMI ID for file servers"
+  type        = string
+  default     = "ami-0a3c3a20c09d6f377" # Default to Amazon Linux 2
+}
+
+variable "app_server_volume_size" {
+  description = "Volume size in GB for app servers"
+  type        = number
+  default     = 100
+}
+
+variable "db_server_volume_size" {
+  description = "Volume size in GB for database servers"
+  type        = number
+  default     = 200
+}
+
+variable "file_server_volume_size" {
+  description = "Volume size in GB for file servers"
+  type        = number
+  default     = 500
 }
 
 variable "total_server_count" {
