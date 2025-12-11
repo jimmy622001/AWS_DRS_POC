@@ -4,6 +4,12 @@ variable "aws_region" {
   type        = string
 }
 
+variable "failover_region" {
+  description = "AWS failover region for disaster recovery"
+  type        = string
+  default     = "eu-west-2"  # London
+}
+
 variable "dr_activated" {
   description = "Boolean flag to indicate if DR is activated (for cost calculation)"
   type        = bool
@@ -28,6 +34,12 @@ variable "public_subnet_cidrs" {
 variable "availability_zones" {
   description = "List of availability zones to use"
   type        = list(string)
+}
+
+variable "failover_availability_zones" {
+  description = "List of availability zones to use in failover region"
+  type        = list(string)
+  default     = ["eu-west-2a", "eu-west-2b"]  # London AZs
 }
 
 variable "create_nat_gateway" {

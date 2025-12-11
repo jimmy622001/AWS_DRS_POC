@@ -1,6 +1,6 @@
-Banking Disaster Recovery Solution (DRS)
+# AWS Disaster Recovery Solution (DRS) POC
 
-This project provides two distinct disaster recovery (DR) options for banking environments, designed to meet different requirements and budget considerations.
+This project provides two distinct disaster recovery (DR) options for banking environments, designed to meet different requirements and budget considerations. The solution uses **Ireland (eu-west-1)** as the primary region and **London (eu-west-2)** as the failover region.
 
 DR Solution Options
 
@@ -48,25 +48,42 @@ Review our [cost comparison document](docs/cost-comparison.md) to understand the
 Project Structure
 
 ```
-banking-dr/
+AWS_DRS_POC/
 ├── README.md                 # This overview document
 ├── DRS-proposal.md           # Option 1: VPN-only solution details
-├── hybrid-proposal.md        # Option 2: Hybrid with Direct Connect details
+├── HYBRID-PROPOSAL.md        # Option 2: Hybrid with Direct Connect details
+├── INFRASTRUCTURE.md         # Infrastructure setup instructions
 ├── docs/                     # Additional documentation
 │   ├── cost-comparison.md    # Cost comparison between options
 │   ├── terraform-implementation.md # Technical implementation details
-│   ├── architecture-vpn.png  # VPN architecture diagram
-│   └── hybrid-architecture.png # Hybrid architecture diagram
+│   ├── regions.md            # Details about primary and failover regions
+│   ├── architecture.md       # Architecture documentation
+│   ├── hybrid_connectivity.md # Hybrid connectivity details
+│   └── replication_strategy.md # Replication strategy documentation
 └── modules/                  # Terraform modules
     ├── drs/                  # AWS Elastic DR Service module
     ├── networking/           # VPC, subnets, VPN configuration
-    └── direct_connect/       # Direct Connect configuration
+    ├── compute/              # Compute resources configuration
+    ├── database/             # Database resources configuration 
+    ├── storage/              # Storage resources configuration
+    ├── monitoring/           # Monitoring setup
+    ├── direct_connect/       # Direct Connect configuration
+    ├── analytics/            # Analytics configuration
+    ├── cicd/                 # CI/CD pipeline configuration
+    └── infracost/            # Cost analysis tools
 ```
 
 Getting Started
 
 1. Review both DR options in their respective documentation
-2. Compare the cost implications using the cost comparison document
+2. Compare the cost implications using the [cost comparison document](docs/cost-comparison.md)
 3. Select the most appropriate option based on your requirements
 4. Review the [technical implementation details](docs/terraform-implementation.md) for Terraform code
-5. Follow the implementation instructions in the selected option document
+5. Understand the [region configuration](docs/regions.md) for primary (Ireland) and failover (London) regions
+6. Follow the implementation instructions in the [infrastructure setup document](INFRASTRUCTURE.md)
+
+This project is configured to use:
+- **Primary region**: Ireland (eu-west-1)
+- **Failover region**: London (eu-west-2)
+
+These regions were selected for their proximity, compliance with European data regulations, and complete service availability.

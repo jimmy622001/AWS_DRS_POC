@@ -1,5 +1,12 @@
+# Main AWS provider for primary region (Ireland)
 provider "aws" {
-  region = var.aws_region
+  region = var.aws_region  # eu-west-1 (Ireland)
+}
+
+# Failover region provider (not actively used until failover)
+provider "aws" {
+  alias  = "failover"
+  region = var.failover_region  # eu-west-2 (London)
 }
 
 # Networking Module

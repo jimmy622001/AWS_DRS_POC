@@ -2,14 +2,14 @@
 # Copy this file to terraform.tfvars and fill in appropriate values
 
 # Core settings
-aws_region  = "us-east-1"
+aws_region  = "eu-west-1"  # Primary region: Ireland
 dr_activated = false  # Set to true when testing DR activation costs
 
 # Network settings
 vpc_cidr = "10.0.0.0/16"
 private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
 public_subnet_cidrs = ["10.0.101.0/24", "10.0.102.0/24"]
-availability_zones = ["us-east-1a", "us-east-1b"]
+availability_zones = ["eu-west-1a", "eu-west-1b"]
 create_nat_gateway = true
 allowed_external_cidrs = ["0.0.0.0/0"]  # Restrict this in production
 customer_gateway_ip = "YOUR_ONPREM_GATEWAY_IP"
@@ -17,8 +17,8 @@ customer_gateway_bgp_asn = 65000
 vpn_route_cidrs = ["YOUR_ONPREM_CIDR"]
 create_client_vpn = false
 client_vpn_cidr = "10.200.0.0/22"
-client_vpn_server_cert_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/EXAMPLE"
-client_vpn_client_cert_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/EXAMPLE"
+client_vpn_server_cert_arn = "arn:aws:acm:eu-west-1:ACCOUNT_ID:certificate/EXAMPLE"
+client_vpn_client_cert_arn = "arn:aws:acm:eu-west-1:ACCOUNT_ID:certificate/EXAMPLE"
 
 # Compute variables
 ami_id = "ami-0c55b159cbfafe1f0"
@@ -61,7 +61,7 @@ ad_ou_path = "OU=Servers,DC=example,DC=local"
 s3_bucket_name = "example-dr-bucket"  # Must be globally unique
 storage_gateway_role_arn = "arn:aws:iam::ACCOUNT_ID:role/storage-gateway-role"
 datasync_role_arn = "arn:aws:iam::ACCOUNT_ID:role/datasync-role"
-datasync_source_location_arn = "arn:aws:datasync:REGION:ACCOUNT_ID:location/loc-example"
+datasync_source_location_arn = "arn:aws:datasync:eu-west-1:ACCOUNT_ID:location/loc-example"
 
 # DRS variables
 app_server_count = 5
@@ -81,4 +81,10 @@ file_server_source_ids = ["s-example8"]
 monitoring_source_server_ids = ["s-example1", "s-example2", "s-example3", "s-example4", "s-example5", "s-example6", "s-example7", "s-example8"]
 replication_lag_threshold_seconds = 3600
 rto_threshold_minutes = 60
-sns_topic_arn = "arn:aws:sns:REGION:ACCOUNT_ID:topic-name"
+sns_topic_arn = "arn:aws:sns:eu-west-1:ACCOUNT_ID:topic-name"
+
+# Failover region settings (London)
+# When implementing actual failover, you would update aws_region to eu-west-2
+# and availability_zones to eu-west-2 values
+failover_region = "eu-west-2"  # Failover region: London
+failover_availability_zones = ["eu-west-2a", "eu-west-2b"]
