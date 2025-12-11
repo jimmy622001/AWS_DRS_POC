@@ -50,7 +50,7 @@ resource "aws_storagegateway_gateway" "file_gateway" {
   gateway_timezone     = "GMT"
   gateway_type         = "FILE_S3"
   gateway_vpc_endpoint = var.vpc_endpoint_id
-  gateway_ip_address   = "192.0.2.10"  # This is a placeholder IP. In a real environment, use the actual gateway IP.
+  gateway_ip_address   = "192.0.2.10" # This is a placeholder IP. In a real environment, use the actual gateway IP.
 
   tags = {
     Name = "dr-file-gateway"

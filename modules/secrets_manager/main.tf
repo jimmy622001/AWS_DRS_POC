@@ -1,7 +1,7 @@
 # Create a list of secret names for use in count
 locals {
   secret_names_list = keys(var.secrets)
-  secret_count = length(local.secret_names_list)
+  secret_count      = length(local.secret_names_list)
 }
 
 resource "aws_secretsmanager_secret" "secrets" {

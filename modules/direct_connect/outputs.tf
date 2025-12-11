@@ -5,7 +5,7 @@ output "dx_connection_id" {
 
 output "dx_connection_state" {
   description = "State of the Direct Connect connection"
-  value       = var.enabled ? aws_dx_connection.this[0].id : null  # Using 'id' as a fallback since connection_state isn't available
+  value       = var.enabled ? aws_dx_connection.this[0].id : null # Using 'id' as a fallback since connection_state isn't available
 }
 
 output "dx_gateway_id" {

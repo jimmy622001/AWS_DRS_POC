@@ -59,46 +59,47 @@ resource "aws_route_table_association" "dr_public_rt_assoc" {
 }
 
 resource "aws_eip" "dr_nat_eip" {
-  count      = var.create_nat_gateway ? 1 : 0
+  count      = var.create_nat_gateway ? length(var.availability_zones) : 0
   domain     = "vpc"
   depends_on = [aws_internet_gateway.dr_igw]
 
   tags = {
-    Name = "dr-nat-eip"
+    Name = "dr-nat-eip-${count.index}"
   }
 }
 
 resource "aws_nat_gateway" "dr_nat_gateway" {
-  count         = var.create_nat_gateway ? 1 : 0
-  allocation_id = aws_eip.dr_nat_eip[0].id
-  subnet_id     = aws_subnet.dr_public_subnets[0].id
+  count         = var.create_nat_gateway ? length(var.availability_zones) : 0
+  allocation_id = aws_eip.dr_nat_eip[count.index].id
+  subnet_id     = aws_subnet.dr_public_subnets[count.index].id
   depends_on    = [aws_internet_gateway.dr_igw]
 
   tags = {
-    Name = "dr-nat-gateway"
+    Name = "dr-nat-gateway-${var.availability_zones[count.index]}"
   }
 }
 
 resource "aws_route_table" "dr_private_rt" {
+  count  = length(var.availability_zones)
   vpc_id = aws_vpc.dr_vpc.id
 
   dynamic "route" {
     for_each = var.create_nat_gateway ? [1] : []
     content {
       cidr_block     = "0.0.0.0/0"
-      nat_gateway_id = aws_nat_gateway.dr_nat_gateway[0].id
+      nat_gateway_id = aws_nat_gateway.dr_nat_gateway[count.index].id
     }
   }
 
   tags = {
-    Name = "dr-private-route-table"
+    Name = "dr-private-route-table-${var.availability_zones[count.index]}"
   }
 }
 
 resource "aws_route_table_association" "dr_private_rt_assoc" {
   count          = length(var.private_subnet_cidrs)
   subnet_id      = aws_subnet.dr_private_subnets[count.index].id
-  route_table_id = aws_route_table.dr_private_rt.id
+  route_table_id = aws_route_table.dr_private_rt[count.index % length(var.availability_zones)].id
 }
 
 resource "aws_security_group" "dr_sg" {

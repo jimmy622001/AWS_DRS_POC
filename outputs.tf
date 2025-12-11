@@ -77,3 +77,23 @@ output "alarm_arns" {
   description = "ARNs of the CloudWatch alarms"
   value       = module.monitoring.alarm_arns
 }
+
+output "recovery_orchestration_step_function_arn" {
+  description = "ARN of the DR recovery orchestration Step Function"
+  value       = module.recovery_orchestration.step_function_arn
+}
+
+output "recovery_event_rule_arn" {
+  description = "ARN of the CloudWatch Event Rule for DR activation"
+  value       = module.recovery_orchestration.recovery_event_rule_arn
+}
+
+output "data_protection_macie_account_id" {
+  description = "ID of the Macie account for DLP"
+  value       = module.data_protection.macie_account_id
+}
+
+output "data_protection_dlp_findings_bucket" {
+  description = "S3 bucket for DLP findings"
+  value       = module.data_protection.dlp_findings_bucket
+}

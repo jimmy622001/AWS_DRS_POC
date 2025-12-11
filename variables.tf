@@ -411,3 +411,23 @@ variable "project" {
   type        = string
   default     = "banking-dr"
 }
+
+# Source region for disaster recovery
+variable "source_region" {
+  description = "AWS region where source servers are located"
+  type        = string
+  default     = "us-east-1"
+}
+
+# Data classification variables
+variable "data_classification_tags" {
+  description = "Map of data classification tags to apply to resources"
+  type        = map(string)
+  default = {
+    "Classification"  = "Confidential"
+    "ComplianceReq"   = "GLBA"
+    "DataOwner"       = "Banking"
+    "DataSteward"     = "dr-team@example.com"
+    "RetentionPeriod" = "7Y"
+  }
+}

@@ -239,3 +239,37 @@ module "logging" {
     Project     = var.project
   }
 }
+
+# Recovery Orchestration Module
+module "recovery_orchestration" {
+  source = "./modules/recovery_orchestration"
+
+  prefix = "${var.project}-${var.environment}"
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+  sns_topic_arn = var.sns_topic_arn
+  source_region = var.source_region
+  account_id    = data.aws_caller_identity.current.account_id
+  source_server_ids = concat(
+    var.app_server_source_ids,
+    var.db_server_source_ids,
+    var.file_server_source_ids
+  )
+}
+
+# Data Protection Module
+module "data_protection" {
+  source = "./modules/data_protection"
+
+  prefix = "${var.project}-${var.environment}"
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+  sns_topic_arn      = var.sns_topic_arn
+  account_id         = data.aws_caller_identity.current.account_id
+  kms_key_id         = module.kms.key_id
+  config_recorder_id = module.security_compliance.config_recorder_id
+}
