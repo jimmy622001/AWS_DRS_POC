@@ -1,0 +1,84 @@
+# Example Terraform variables for Banking DR Solution
+# Copy this file to terraform.tfvars and fill in appropriate values
+
+# Core settings
+aws_region  = "us-east-1"
+dr_activated = false  # Set to true when testing DR activation costs
+
+# Network settings
+vpc_cidr = "10.0.0.0/16"
+private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+public_subnet_cidrs = ["10.0.101.0/24", "10.0.102.0/24"]
+availability_zones = ["us-east-1a", "us-east-1b"]
+create_nat_gateway = true
+allowed_external_cidrs = ["0.0.0.0/0"]  # Restrict this in production
+customer_gateway_ip = "YOUR_ONPREM_GATEWAY_IP"
+customer_gateway_bgp_asn = 65000
+vpn_route_cidrs = ["YOUR_ONPREM_CIDR"]
+create_client_vpn = false
+client_vpn_cidr = "10.200.0.0/22"
+client_vpn_server_cert_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/EXAMPLE"
+client_vpn_client_cert_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/EXAMPLE"
+
+# Compute variables
+ami_id = "ami-0c55b159cbfafe1f0"
+instance_type = "t3.large"
+ebs_volume_size = 100
+instance_count = 3
+min_size = 2
+max_size = 6
+desired_capacity = 3
+create_load_balancer = true
+
+# Database variables
+create_sql_server = true
+create_mysql = true
+create_dms = true
+sql_server_storage_gb = 200
+mysql_storage_gb = 100
+dms_storage_gb = 50
+sql_server_version = "15.00"
+mysql_version = "8.0"
+dms_engine_version = "3.4.6"
+sql_server_instance_class = "db.m5.large"
+mysql_instance_class = "db.m5.large"
+dms_instance_class = "dms.t3.medium"
+db_username = "CHANGE_ME"
+db_password = "CHANGE_ME"  # Change this in your tfvars file
+db_family = "mysql8.0"
+multi_az = true
+backup_retention_days = 7
+
+# Storage variables
+vpc_endpoint_id = "vpce-example"  # Example VPC endpoint ID
+fsx_storage_capacity = 300
+fsx_throughput_capacity = 128
+ad_dns_ips = ["10.0.0.10", "10.0.0.11"]
+ad_domain_name = "example.local"
+ad_password = "CHANGE_ME"  # Change this in your tfvars file
+ad_username = "CHANGE_ME"
+ad_ou_path = "OU=Servers,DC=example,DC=local"
+s3_bucket_name = "example-dr-bucket"  # Must be globally unique
+storage_gateway_role_arn = "arn:aws:iam::ACCOUNT_ID:role/storage-gateway-role"
+datasync_role_arn = "arn:aws:iam::ACCOUNT_ID:role/datasync-role"
+datasync_source_location_arn = "arn:aws:datasync:REGION:ACCOUNT_ID:location/loc-example"
+
+# DRS variables
+app_server_count = 5
+db_server_count = 2
+file_server_count = 1
+app_server_instance_type = "t3.xlarge"
+db_server_instance_type = "r5.2xlarge"
+file_server_instance_type = "m5.xlarge"
+total_server_count = 8  # Sum of all server types
+avg_server_size_gb = 250
+# Source server IDs - these would be real IDs in practice
+app_server_source_ids = ["s-example1", "s-example2", "s-example3", "s-example4", "s-example5"]
+db_server_source_ids = ["s-example6", "s-example7"]
+file_server_source_ids = ["s-example8"]
+
+# Monitoring variables
+monitoring_source_server_ids = ["s-example1", "s-example2", "s-example3", "s-example4", "s-example5", "s-example6", "s-example7", "s-example8"]
+replication_lag_threshold_seconds = 3600
+rto_threshold_minutes = 60
+sns_topic_arn = "arn:aws:sns:REGION:ACCOUNT_ID:topic-name"
