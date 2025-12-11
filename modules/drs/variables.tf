@@ -48,19 +48,19 @@ variable "file_server_count" {
 variable "app_server_source_ids" {
   description = "List of app server source IDs for recovery"
   type        = list(string)
-  default     = []  # This default is kept for simplicity in this example
+  default     = [] # This default is kept for simplicity in this example
 }
 
 variable "db_server_source_ids" {
   description = "List of database server source IDs for recovery"
   type        = list(string)
-  default     = []  # This default is kept for simplicity in this example
+  default     = [] # This default is kept for simplicity in this example
 }
 
 variable "file_server_source_ids" {
   description = "List of file server source IDs for recovery"
   type        = list(string)
-  default     = []  # This default is kept for simplicity in this example
+  default     = [] # This default is kept for simplicity in this example
 }
 
 variable "app_server_instance_type" {

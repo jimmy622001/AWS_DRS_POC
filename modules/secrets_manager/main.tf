@@ -1,22 +1,28 @@
+# Create a list of secret names for use in count
+locals {
+  secret_names_list = keys(var.secrets)
+  secret_count = length(local.secret_names_list)
+}
+
 resource "aws_secretsmanager_secret" "secrets" {
-  for_each = var.secrets
-  
-  name                    = "${var.prefix}-${each.key}"
-  description             = "Secret for ${each.key}"
+  count = local.secret_count
+
+  name                    = "${var.prefix}-${local.secret_names_list[count.index]}"
+  description             = "Secret for ${local.secret_names_list[count.index]}"
   kms_key_id              = var.kms_key_id
   recovery_window_in_days = var.recovery_window_in_days
 
   tags = merge(
     var.tags,
     {
-      Name = "${var.prefix}-${each.key}"
+      Name = "${var.prefix}-${local.secret_names_list[count.index]}"
     }
   )
 }
 
 resource "aws_secretsmanager_secret_version" "secret_values" {
-  for_each = var.secrets
-  
-  secret_id     = aws_secretsmanager_secret.secrets[each.key].id
-  secret_string = each.value
+  count = local.secret_count
+
+  secret_id     = aws_secretsmanager_secret.secrets[count.index].id
+  secret_string = var.secrets[local.secret_names_list[count.index]]
 }

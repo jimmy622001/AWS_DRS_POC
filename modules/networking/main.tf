@@ -2,7 +2,7 @@ resource "aws_vpc" "dr_vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  
+
   tags = {
     Name = "dr-vpc"
   }
@@ -13,19 +13,19 @@ resource "aws_subnet" "dr_private_subnets" {
   vpc_id            = aws_vpc.dr_vpc.id
   cidr_block        = var.private_subnet_cidrs[count.index]
   availability_zone = var.availability_zones[count.index % length(var.availability_zones)]
-  
+
   tags = {
     Name = "dr-private-subnet-${count.index}"
   }
 }
 
 resource "aws_subnet" "dr_public_subnets" {
-  count             = length(var.public_subnet_cidrs)
-  vpc_id            = aws_vpc.dr_vpc.id
-  cidr_block        = var.public_subnet_cidrs[count.index]
-  availability_zone = var.availability_zones[count.index % length(var.availability_zones)]
+  count                   = length(var.public_subnet_cidrs)
+  vpc_id                  = aws_vpc.dr_vpc.id
+  cidr_block              = var.public_subnet_cidrs[count.index]
+  availability_zone       = var.availability_zones[count.index % length(var.availability_zones)]
   map_public_ip_on_launch = true
-  
+
   tags = {
     Name = "dr-public-subnet-${count.index}"
   }
@@ -33,7 +33,7 @@ resource "aws_subnet" "dr_public_subnets" {
 
 resource "aws_internet_gateway" "dr_igw" {
   vpc_id = aws_vpc.dr_vpc.id
-  
+
   tags = {
     Name = "dr-igw"
   }
@@ -41,12 +41,12 @@ resource "aws_internet_gateway" "dr_igw" {
 
 resource "aws_route_table" "dr_public_rt" {
   vpc_id = aws_vpc.dr_vpc.id
-  
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.dr_igw.id
   }
-  
+
   tags = {
     Name = "dr-public-route-table"
   }
@@ -62,7 +62,7 @@ resource "aws_eip" "dr_nat_eip" {
   count      = var.create_nat_gateway ? 1 : 0
   domain     = "vpc"
   depends_on = [aws_internet_gateway.dr_igw]
-  
+
   tags = {
     Name = "dr-nat-eip"
   }
@@ -73,7 +73,7 @@ resource "aws_nat_gateway" "dr_nat_gateway" {
   allocation_id = aws_eip.dr_nat_eip[0].id
   subnet_id     = aws_subnet.dr_public_subnets[0].id
   depends_on    = [aws_internet_gateway.dr_igw]
-  
+
   tags = {
     Name = "dr-nat-gateway"
   }
@@ -81,7 +81,7 @@ resource "aws_nat_gateway" "dr_nat_gateway" {
 
 resource "aws_route_table" "dr_private_rt" {
   vpc_id = aws_vpc.dr_vpc.id
-  
+
   dynamic "route" {
     for_each = var.create_nat_gateway ? [1] : []
     content {
@@ -89,7 +89,7 @@ resource "aws_route_table" "dr_private_rt" {
       nat_gateway_id = aws_nat_gateway.dr_nat_gateway[0].id
     }
   }
-  
+
   tags = {
     Name = "dr-private-route-table"
   }
@@ -105,7 +105,7 @@ resource "aws_security_group" "dr_sg" {
   name        = "dr-security-group"
   description = "Security group for DR resources"
   vpc_id      = aws_vpc.dr_vpc.id
-  
+
   ingress {
     from_port   = 0
     to_port     = 0
@@ -113,7 +113,7 @@ resource "aws_security_group" "dr_sg" {
     cidr_blocks = [var.vpc_cidr]
     description = "Allow all internal traffic"
   }
-  
+
   ingress {
     from_port   = 443
     to_port     = 443
@@ -121,7 +121,7 @@ resource "aws_security_group" "dr_sg" {
     cidr_blocks = var.allowed_external_cidrs
     description = "Allow HTTPS from specified external CIDRs"
   }
-  
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -129,7 +129,7 @@ resource "aws_security_group" "dr_sg" {
     cidr_blocks = ["0.0.0.0/0"]
     description = "Allow all outbound traffic"
   }
-  
+
   tags = {
     Name = "dr-security-group"
   }
@@ -137,7 +137,7 @@ resource "aws_security_group" "dr_sg" {
 
 resource "aws_vpn_gateway" "dr_vpn_gateway" {
   vpc_id = aws_vpc.dr_vpc.id
-  
+
   tags = {
     Name = "dr-vpn-gateway"
   }
@@ -147,7 +147,7 @@ resource "aws_customer_gateway" "dr_customer_gateway" {
   bgp_asn    = var.customer_gateway_bgp_asn
   ip_address = var.customer_gateway_ip
   type       = "ipsec.1"
-  
+
   tags = {
     Name = "dr-customer-gateway"
   }
@@ -158,7 +158,7 @@ resource "aws_vpn_connection" "dr_vpn_connection" {
   customer_gateway_id = aws_customer_gateway.dr_customer_gateway.id
   type                = "ipsec.1"
   static_routes_only  = true
-  
+
   tags = {
     Name = "dr-vpn-connection"
   }
@@ -171,20 +171,20 @@ resource "aws_vpn_connection_route" "dr_vpn_route" {
 }
 
 resource "aws_ec2_client_vpn_endpoint" "dr_client_vpn" {
-  count               = var.create_client_vpn ? 1 : 0
-  description         = "DR Client VPN Endpoint"
+  count                  = var.create_client_vpn ? 1 : 0
+  description            = "DR Client VPN Endpoint"
   server_certificate_arn = var.client_vpn_server_cert_arn
-  client_cidr_block   = var.client_vpn_cidr
-  
+  client_cidr_block      = var.client_vpn_cidr
+
   authentication_options {
     type                       = "certificate-authentication"
     root_certificate_chain_arn = var.client_vpn_client_cert_arn
   }
-  
+
   connection_log_options {
     enabled = false
   }
-  
+
   tags = {
     Name = "dr-client-vpn"
   }

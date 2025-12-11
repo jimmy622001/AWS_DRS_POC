@@ -5,7 +5,7 @@ output "dashboard_arn" {
 
 output "alarm_arns" {
   description = "ARNs of the CloudWatch alarms"
-  value       = concat(
+  value = concat(
     aws_cloudwatch_metric_alarm.drs_replication_lag[*].arn,
     [aws_cloudwatch_metric_alarm.recovery_time_objective.arn]
   )

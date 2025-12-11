@@ -1,7 +1,7 @@
 # IAM Role for DRS with least privilege
 resource "aws_iam_role" "drs_role" {
   name = "${var.prefix}-drs-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -14,7 +14,7 @@ resource "aws_iam_role" "drs_role" {
       }
     ]
   })
-  
+
   tags = var.tags
 }
 
@@ -22,7 +22,7 @@ resource "aws_iam_role" "drs_role" {
 resource "aws_iam_policy" "drs_policy" {
   name        = "${var.prefix}-drs-policy"
   description = "Policy for AWS DRS with least privilege"
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [

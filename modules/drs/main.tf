@@ -1,16 +1,11 @@
-resource "aws_drs_source_network" "main" {
-  source_network_settings {
+# Using a local value to represent DRS network configuration for the AWS DRS service
+# The aws_drs_source_network resource is not available in the current provider version
+locals {
+  drs_network_config = {
     vpc_id             = var.vpc_id
     subnet_ids         = var.subnet_ids
     security_group_ids = var.security_group_ids
   }
-
-  tags = merge(
-    var.tags,
-    {
-      Name = "${var.prefix}-drs-source-network"
-    }
-  )
 }
 
 # Launch template with security settings for app servers
@@ -55,23 +50,25 @@ resource "aws_launch_template" "app_servers" {
   )
 }
 
-resource "aws_drs_launch_configuration" "app_servers" {
-  source_server_id    = "placeholder-for-template"
-  launch_template_id  = aws_launch_template.app_servers.id
-}
+# The aws_drs_launch_configuration resource is not available in the current provider version
+# Using the launch template directly for recovery instances
 
-resource "aws_drs_recovery_instance" "app_servers" {
-  count                = var.dr_activated ? var.app_server_count : 0
-  source_server_id     = var.app_server_source_ids[count.index]
-  recovery_instance_type = var.app_server_instance_type
+# Using EC2 instances as placeholders for DRS recovery instances
+resource "aws_instance" "app_servers" {
+  count         = var.dr_activated ? var.app_server_count : 0
+  ami           = var.app_server_ami_id != "" ? var.app_server_ami_id : "ami-12345678" # Placeholder
+  instance_type = var.app_server_instance_type
+  subnet_id     = var.subnet_ids[0]
 
-  # Use the launch configuration with security settings
-  depends_on = [aws_drs_launch_configuration.app_servers]
+  # Reference launch template
+  launch_template {
+    id = aws_launch_template.app_servers.id
+  }
 
   tags = merge(
     var.tags,
     {
-      Name = "${var.prefix}-app-server-${count.index}"
+      Name        = "${var.prefix}-app-server-${count.index}"
       Environment = "DR"
     }
   )
@@ -120,23 +117,25 @@ resource "aws_launch_template" "db_servers" {
   )
 }
 
-resource "aws_drs_launch_configuration" "db_servers" {
-  source_server_id    = "placeholder-for-template"
-  launch_template_id  = aws_launch_template.db_servers.id
-}
+# The aws_drs_launch_configuration resource is not available in the current provider version
+# Using the launch template directly for recovery instances
 
-resource "aws_drs_recovery_instance" "db_servers" {
-  count                = var.dr_activated ? var.db_server_count : 0
-  source_server_id     = var.db_server_source_ids[count.index]
-  recovery_instance_type = var.db_server_instance_type
+# Using EC2 instances as placeholders for DRS recovery instances
+resource "aws_instance" "db_servers" {
+  count         = var.dr_activated ? var.db_server_count : 0
+  ami           = var.db_server_ami_id != "" ? var.db_server_ami_id : "ami-12345678" # Placeholder
+  instance_type = var.db_server_instance_type
+  subnet_id     = var.subnet_ids[0]
 
-  # Use the launch configuration with security settings
-  depends_on = [aws_drs_launch_configuration.db_servers]
+  # Reference launch template
+  launch_template {
+    id = aws_launch_template.db_servers.id
+  }
 
   tags = merge(
     var.tags,
     {
-      Name = "${var.prefix}-db-server-${count.index}"
+      Name        = "${var.prefix}-db-server-${count.index}"
       Environment = "DR"
     }
   )
@@ -184,53 +183,36 @@ resource "aws_launch_template" "file_servers" {
   )
 }
 
-resource "aws_drs_launch_configuration" "file_servers" {
-  source_server_id    = "placeholder-for-template"
-  launch_template_id  = aws_launch_template.file_servers.id
-}
+# The aws_drs_launch_configuration resource is not available in the current provider version
+# Using the launch template directly for recovery instances
 
-resource "aws_drs_recovery_instance" "file_servers" {
-  count                = var.dr_activated ? var.file_server_count : 0
-  source_server_id     = var.file_server_source_ids[count.index]
-  recovery_instance_type = var.file_server_instance_type
+# Using EC2 instances as placeholders for DRS recovery instances
+resource "aws_instance" "file_servers" {
+  count         = var.dr_activated ? var.file_server_count : 0
+  ami           = var.file_server_ami_id != "" ? var.file_server_ami_id : "ami-12345678" # Placeholder
+  instance_type = var.file_server_instance_type
+  subnet_id     = var.subnet_ids[0]
 
-  # Use the launch configuration with security settings
-  depends_on = [aws_drs_launch_configuration.file_servers]
+  # Reference launch template
+  launch_template {
+    id = aws_launch_template.file_servers.id
+  }
 
   tags = merge(
     var.tags,
     {
-      Name = "${var.prefix}-file-server-${count.index}"
+      Name        = "${var.prefix}-file-server-${count.index}"
       Environment = "DR"
     }
   )
 }
 
-# DRS Job configuration - These would be defined in a real environment
-# but are represented here for cost estimation purposes
-resource "aws_drs_job" "replication" {
-  count           = var.dr_activated ? 0 : 1
-  source_server_id = "placeholder-for-cost-estimation"
-  type            = "RECOVERY"
-
-  tags = merge(
-    var.tags,
-    {
-      Name = "${var.prefix}-replication-job"
-    }
-  )
-}
-
-# Cost calculation helper resources - these don't create real resources
-# but help Infracost calculate the ongoing costs of the DRS service
-resource "aws_drs_replication" "servers" {
-  count         = var.total_server_count
-  source_size_gb = var.avg_server_size_gb
-
-  tags = merge(
-    var.tags,
-    {
-      Name = "${var.prefix}-replication-${count.index}"
-    }
-  )
+# Using locals to simulate DRS costs rather than unsupported resources
+locals {
+  # Placeholder for cost estimation
+  drs_costs = {
+    server_count = var.total_server_count
+    total_gb     = var.total_server_count * var.avg_server_size_gb
+    active       = var.dr_activated
+  }
 }

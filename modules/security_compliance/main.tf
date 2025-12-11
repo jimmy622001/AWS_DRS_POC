@@ -2,7 +2,7 @@
 resource "aws_config_configuration_recorder" "main" {
   name     = "${var.prefix}-config-recorder"
   role_arn = aws_iam_role.config.arn
-  
+
   recording_group {
     all_supported                 = true
     include_global_resource_types = true
@@ -12,11 +12,11 @@ resource "aws_config_configuration_recorder" "main" {
 resource "aws_config_delivery_channel" "main" {
   name           = "${var.prefix}-config-delivery-channel"
   s3_bucket_name = aws_s3_bucket.config.id
-  
+
   snapshot_delivery_properties {
     delivery_frequency = "Six_Hours"
   }
-  
+
   depends_on = [aws_config_configuration_recorder.main]
 }
 
@@ -28,7 +28,7 @@ resource "aws_config_configuration_recorder_status" "main" {
 
 resource "aws_iam_role" "config" {
   name = "${var.prefix}-config-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -41,7 +41,7 @@ resource "aws_iam_role" "config" {
       }
     ]
   })
-  
+
   tags = var.tags
 }
 
@@ -53,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "config" {
 resource "aws_iam_role_policy" "config_s3" {
   name = "${var.prefix}-config-s3-policy"
   role = aws_iam_role.config.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -61,11 +61,11 @@ resource "aws_iam_role_policy" "config_s3" {
         Action = [
           "s3:PutObject"
         ],
-        Effect = "Allow",
+        Effect   = "Allow",
         Resource = "${aws_s3_bucket.config.arn}/*",
         Condition = {
           StringLike = {
-            "s3:x-amz-acl": "bucket-owner-full-control"
+            "s3:x-amz-acl" : "bucket-owner-full-control"
           }
         }
       },
@@ -73,7 +73,7 @@ resource "aws_iam_role_policy" "config_s3" {
         Action = [
           "s3:GetBucketAcl"
         ],
-        Effect = "Allow",
+        Effect   = "Allow",
         Resource = aws_s3_bucket.config.arn
       }
     ]
@@ -81,9 +81,9 @@ resource "aws_iam_role_policy" "config_s3" {
 }
 
 resource "aws_s3_bucket" "config" {
-  bucket = "${var.prefix}-config-${var.account_id}"
+  bucket        = "${var.prefix}-config-${var.account_id}"
   force_destroy = true
-  
+
   tags = merge(
     var.tags,
     {
@@ -112,7 +112,7 @@ resource "aws_s3_bucket_versioning" "config" {
 
 resource "aws_s3_bucket_policy" "config" {
   bucket = aws_s3_bucket.config.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -128,22 +128,22 @@ resource "aws_s3_bucket_policy" "config" {
         Resource = "${aws_s3_bucket.config.arn}/*",
         Condition = {
           StringEquals = {
-            "s3:x-amz-acl": "bucket-owner-full-control"
+            "s3:x-amz-acl" : "bucket-owner-full-control"
           }
         }
       },
       {
-        Sid    = "AllowSSLRequestsOnly",
-        Effect = "Deny",
+        Sid       = "AllowSSLRequestsOnly",
+        Effect    = "Deny",
         Principal = "*",
-        Action = "s3:*",
+        Action    = "s3:*",
         Resource = [
           aws_s3_bucket.config.arn,
           "${aws_s3_bucket.config.arn}/*"
         ],
         Condition = {
           Bool = {
-            "aws:SecureTransport": "false"
+            "aws:SecureTransport" : "false"
           }
         }
       }
@@ -174,52 +174,52 @@ resource "aws_securityhub_standards_subscription" "aws_fsbp" {
 resource "aws_config_config_rule" "encrypted_volumes" {
   name        = "${var.prefix}-encrypted-volumes"
   description = "Checks whether EBS volumes are encrypted"
-  
+
   source {
     owner             = "AWS"
     source_identifier = "ENCRYPTED_VOLUMES"
   }
-  
+
   depends_on = [aws_config_configuration_recorder.main]
 }
 
 resource "aws_config_config_rule" "restricted_ssh" {
   name        = "${var.prefix}-restricted-ssh"
   description = "Checks whether security groups allow unrestricted SSH access"
-  
+
   source {
     owner             = "AWS"
     source_identifier = "RESTRICTED_INCOMING_TRAFFIC"
   }
-  
+
   input_parameters = jsonencode({
     blockedPort1 = "22"
   })
-  
+
   depends_on = [aws_config_configuration_recorder.main]
 }
 
 resource "aws_config_config_rule" "cmk_backing_key" {
   name        = "${var.prefix}-cmk-backing-key"
   description = "Checks that KMS key policies are in use"
-  
+
   source {
     owner             = "AWS"
     source_identifier = "CMK_BACKING_KEY_ROTATION_ENABLED"
   }
-  
+
   depends_on = [aws_config_configuration_recorder.main]
 }
 
 resource "aws_config_config_rule" "restricted_common_ports" {
   name        = "${var.prefix}-restricted-common-ports"
   description = "Checks whether security groups allow unrestricted access to common ports"
-  
+
   source {
     owner             = "AWS"
     source_identifier = "RESTRICTED_INCOMING_TRAFFIC"
   }
-  
+
   input_parameters = jsonencode({
     blockedPort1 = "3389"
     blockedPort2 = "1433"
@@ -227,6 +227,6 @@ resource "aws_config_config_rule" "restricted_common_ports" {
     blockedPort4 = "5432"
     blockedPort5 = "5500"
   })
-  
+
   depends_on = [aws_config_configuration_recorder.main]
 }

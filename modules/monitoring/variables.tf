@@ -21,5 +21,5 @@ variable "rto_threshold_minutes" {
 variable "sns_topic_arn" {
   description = "ARN of the SNS topic for alarms"
   type        = string
-  default     = ""  # This default is intentionally empty to allow creation of a new topic
+  default     = "" # This default is intentionally empty to allow creation of a new topic
 }

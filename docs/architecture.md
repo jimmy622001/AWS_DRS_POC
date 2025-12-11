@@ -1,8 +1,8 @@
-Banking Disaster Recovery - AWS Architecture
+# Banking Disaster Recovery - AWS Architecture
 
-Architecture Overview
+## Architecture Overview
 
-This document outlines the high-level architecture for the AWS-based Disaster Recovery (DR) solution for the on-premise banking infrastructure.
+This document outlines the high-level architecture for the AWS-based Disaster Recovery (DR) solution for the on-premise banking infrastructure. This architecture has been streamlined to focus specifically on core DR functionality, with unnecessary components removed.
 
 ```
                                          +-----------------+
@@ -189,3 +189,16 @@ Testing Schedule
 - Quarterly DR drills
 - Monthly component testing
 - Annual full-scale recovery test
+
+## Removed Components
+
+The following components have been removed from the architecture to focus on core DR functionality:
+
+### Analytics
+Analytics workloads are not part of the core DR requirements. In a disaster recovery scenario, restoring critical banking operations takes precedence over analytics capabilities. Analytics infrastructure such as Redshift clusters should remain in the production environment.
+
+### CI/CD
+Continuous Integration/Continuous Deployment pipelines are development tools not essential for DR operations. During a DR event, applications are recovered through the migration service rather than through a development pipeline.
+
+### Cost Estimation Utilities
+Infracost and related utilities have been removed as they are development-time tools rather than part of the production DR infrastructure. Cost projections can be performed separately from the core infrastructure code.

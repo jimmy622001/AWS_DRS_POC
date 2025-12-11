@@ -2,7 +2,7 @@
 resource "aws_s3_bucket" "cloudtrail" {
   bucket        = "${var.prefix}-cloudtrail-${var.account_id}"
   force_destroy = true
-  
+
   tags = merge(
     var.tags,
     {
@@ -31,7 +31,7 @@ resource "aws_s3_bucket_versioning" "cloudtrail" {
 
 resource "aws_s3_bucket_policy" "cloudtrail" {
   bucket = aws_s3_bucket.cloudtrail.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -50,22 +50,22 @@ resource "aws_s3_bucket_policy" "cloudtrail" {
         Resource  = "${aws_s3_bucket.cloudtrail.arn}/AWSLogs/${var.account_id}/*",
         Condition = {
           StringEquals = {
-            "s3:x-amz-acl": "bucket-owner-full-control"
+            "s3:x-amz-acl" : "bucket-owner-full-control"
           }
         }
       },
       {
-        Sid    = "AllowSSLRequestsOnly",
-        Effect = "Deny",
+        Sid       = "AllowSSLRequestsOnly",
+        Effect    = "Deny",
         Principal = "*",
-        Action = "s3:*",
+        Action    = "s3:*",
         Resource = [
           aws_s3_bucket.cloudtrail.arn,
           "${aws_s3_bucket.cloudtrail.arn}/*"
         ],
         Condition = {
           Bool = {
-            "aws:SecureTransport": "false"
+            "aws:SecureTransport" : "false"
           }
         }
       }
@@ -78,14 +78,14 @@ resource "aws_cloudwatch_log_group" "cloudtrail" {
   name              = "/aws/cloudtrail/${var.prefix}"
   retention_in_days = 365
   kms_key_id        = var.kms_key_id
-  
+
   tags = var.tags
 }
 
 # IAM Role for CloudTrail to CloudWatch Logs
 resource "aws_iam_role" "cloudtrail_cloudwatch" {
   name = "${var.prefix}-cloudtrail-cloudwatch-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -98,14 +98,14 @@ resource "aws_iam_role" "cloudtrail_cloudwatch" {
       }
     ]
   })
-  
+
   tags = var.tags
 }
 
 resource "aws_iam_role_policy" "cloudtrail_cloudwatch" {
   name = "${var.prefix}-cloudtrail-cloudwatch-policy"
   role = aws_iam_role.cloudtrail_cloudwatch.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -131,22 +131,22 @@ resource "aws_cloudtrail" "main" {
   cloud_watch_logs_group_arn    = "${aws_cloudwatch_log_group.cloudtrail.arn}:*"
   cloud_watch_logs_role_arn     = aws_iam_role.cloudtrail_cloudwatch.arn
   kms_key_id                    = var.kms_key_id
-  
+
   event_selector {
     read_write_type           = "All"
     include_management_events = true
-    
+
     data_resource {
       type   = "AWS::S3::Object"
       values = ["arn:aws:s3:::"]
     }
-    
+
     data_resource {
       type   = "AWS::Lambda::Function"
       values = ["arn:aws:lambda"]
     }
   }
-  
+
   tags = merge(
     var.tags,
     {
@@ -162,7 +162,7 @@ resource "aws_flow_log" "main" {
   traffic_type         = "ALL"
   vpc_id               = var.vpc_id
   iam_role_arn         = aws_iam_role.vpc_flow_logs.arn
-  
+
   tags = merge(
     var.tags,
     {
@@ -175,13 +175,13 @@ resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
   name              = "/aws/vpc/flowlogs/${var.prefix}"
   retention_in_days = 365
   kms_key_id        = var.kms_key_id
-  
+
   tags = var.tags
 }
 
 resource "aws_iam_role" "vpc_flow_logs" {
   name = "${var.prefix}-vpc-flow-logs-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -194,14 +194,14 @@ resource "aws_iam_role" "vpc_flow_logs" {
       }
     ]
   })
-  
+
   tags = var.tags
 }
 
 resource "aws_iam_role_policy" "vpc_flow_logs" {
   name = "${var.prefix}-vpc-flow-logs-policy"
   role = aws_iam_role.vpc_flow_logs.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -223,9 +223,9 @@ resource "aws_iam_role_policy" "vpc_flow_logs" {
 resource "aws_cloudwatch_event_rule" "security_hub_findings" {
   name        = "${var.prefix}-security-hub-findings"
   description = "Capture Security Hub Findings"
-  
+
   event_pattern = jsonencode({
-    source = ["aws.securityhub"],
+    source      = ["aws.securityhub"],
     detail_type = ["Security Hub Findings - Imported"],
     detail = {
       findings = {
@@ -235,7 +235,7 @@ resource "aws_cloudwatch_event_rule" "security_hub_findings" {
       }
     }
   })
-  
+
   tags = var.tags
 }
 
@@ -243,7 +243,7 @@ resource "aws_cloudwatch_event_rule" "security_hub_findings" {
 resource "aws_sns_topic" "security_alerts" {
   name              = "${var.prefix}-security-alerts"
   kms_master_key_id = var.kms_key_id
-  
+
   tags = var.tags
 }
 
@@ -255,7 +255,7 @@ resource "aws_cloudwatch_event_target" "security_hub_to_sns" {
 
 resource "aws_sns_topic_policy" "security_alerts" {
   arn = aws_sns_topic.security_alerts.arn
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -264,7 +264,7 @@ resource "aws_sns_topic_policy" "security_alerts" {
         Principal = {
           Service = "events.amazonaws.com"
         },
-        Action = "sns:Publish",
+        Action   = "sns:Publish",
         Resource = aws_sns_topic.security_alerts.arn
       }
     ]

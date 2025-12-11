@@ -10,17 +10,17 @@ data "aws_caller_identity" "current" {}
 module "networking" {
   source = "./modules/networking"
 
-  vpc_cidr                = var.vpc_cidr
-  private_subnet_cidrs    = var.private_subnet_cidrs
-  public_subnet_cidrs     = var.public_subnet_cidrs
-  availability_zones      = var.availability_zones
-  create_nat_gateway      = var.create_nat_gateway
-  allowed_external_cidrs  = var.allowed_external_cidrs
-  customer_gateway_ip     = var.customer_gateway_ip
-  customer_gateway_bgp_asn = var.customer_gateway_bgp_asn
-  vpn_route_cidrs         = var.vpn_route_cidrs
-  create_client_vpn       = var.create_client_vpn
-  client_vpn_cidr         = var.client_vpn_cidr
+  vpc_cidr                   = var.vpc_cidr
+  private_subnet_cidrs       = var.private_subnet_cidrs
+  public_subnet_cidrs        = var.public_subnet_cidrs
+  availability_zones         = var.availability_zones
+  create_nat_gateway         = var.create_nat_gateway
+  allowed_external_cidrs     = var.allowed_external_cidrs
+  customer_gateway_ip        = var.customer_gateway_ip
+  customer_gateway_bgp_asn   = var.customer_gateway_bgp_asn
+  vpn_route_cidrs            = var.vpn_route_cidrs
+  create_client_vpn          = var.create_client_vpn
+  client_vpn_cidr            = var.client_vpn_cidr
   client_vpn_server_cert_arn = var.client_vpn_server_cert_arn
   client_vpn_client_cert_arn = var.client_vpn_client_cert_arn
 }
@@ -49,17 +49,17 @@ module "direct_connect" {
 module "compute" {
   source = "./modules/compute"
 
-  vpc_id             = module.networking.vpc_id
-  subnet_ids         = module.networking.private_subnet_ids
-  security_group_ids = [module.networking.security_group_id]
-  dr_activated       = var.dr_activated
-  ami_id             = var.ami_id
-  instance_type      = var.instance_type
-  ebs_volume_size    = var.ebs_volume_size
-  instance_count     = var.instance_count
-  min_size           = var.min_size
-  max_size           = var.max_size
-  desired_capacity   = var.desired_capacity
+  vpc_id               = module.networking.vpc_id
+  subnet_ids           = module.networking.private_subnet_ids
+  security_group_ids   = [module.networking.security_group_id]
+  dr_activated         = var.dr_activated
+  ami_id               = var.ami_id
+  instance_type        = var.instance_type
+  ebs_volume_size      = var.ebs_volume_size
+  instance_count       = var.instance_count
+  min_size             = var.min_size
+  max_size             = var.max_size
+  desired_capacity     = var.desired_capacity
   create_load_balancer = var.create_load_balancer
 }
 
@@ -81,9 +81,9 @@ module "secrets_manager" {
   source = "./modules/secrets_manager"
 
   secrets = {
-    "db_password"   = var.db_password
-    "ad_password"   = var.ad_password
-    "vpn_password"  = var.vpn_password
+    "db_password"  = var.db_password
+    "ad_password"  = var.ad_password
+    "vpn_password" = var.vpn_password
   }
 
   kms_key_id = module.kms.key_id
@@ -99,10 +99,10 @@ module "secrets_manager" {
 module "security" {
   source = "./modules/security"
 
-  vpc_id     = module.networking.vpc_id
-  subnet_ids = module.networking.private_subnet_ids
-  allowed_ips = var.allowed_ips  # This should be specified with your IP
-  prefix     = "${var.project}-${var.environment}"
+  vpc_id      = module.networking.vpc_id
+  subnet_ids  = module.networking.private_subnet_ids
+  allowed_ips = var.allowed_ips # This should be specified with your IP
+  prefix      = "${var.project}-${var.environment}"
 
   tags = {
     Environment = var.environment
@@ -114,8 +114,8 @@ module "security" {
 module "iam" {
   source = "./modules/iam"
 
-  prefix     = "${var.project}-${var.environment}"
-  account_id = data.aws_caller_identity.current.account_id
+  prefix      = "${var.project}-${var.environment}"
+  account_id  = data.aws_caller_identity.current.account_id
   kms_key_arn = module.kms.key_arn
 
   tags = {
@@ -128,47 +128,45 @@ module "iam" {
 module "database" {
   source = "./modules/database"
 
-  subnet_ids             = module.networking.private_subnet_ids
-  security_group_ids     = [module.security.security_group_id]
-  dr_activated           = var.dr_activated
-  create_sql_server      = var.create_sql_server
-  create_mysql           = var.create_mysql
-  create_dms             = var.create_dms
-  sql_server_storage_gb  = var.sql_server_storage_gb
-  mysql_storage_gb       = var.mysql_storage_gb
-  dms_storage_gb         = var.dms_storage_gb
-  sql_server_version     = var.sql_server_version
-  mysql_version          = var.mysql_version
-  dms_engine_version     = var.dms_engine_version
+  subnet_ids                = module.networking.private_subnet_ids
+  security_group_ids        = [module.security.security_group_id]
+  dr_activated              = var.dr_activated
+  create_sql_server         = var.create_sql_server
+  create_mysql              = var.create_mysql
+  create_dms                = var.create_dms
+  sql_server_storage_gb     = var.sql_server_storage_gb
+  mysql_storage_gb          = var.mysql_storage_gb
+  dms_storage_gb            = var.dms_storage_gb
+  sql_server_version        = var.sql_server_version
+  mysql_version             = var.mysql_version
+  dms_engine_version        = var.dms_engine_version
   sql_server_instance_class = var.sql_server_instance_class
-  mysql_instance_class   = var.mysql_instance_class
-  dms_instance_class     = var.dms_instance_class
-  db_username            = var.db_username
-  db_password            = module.secrets_manager.secret_arns["db_password"]
-  db_family              = var.db_family
-  multi_az               = var.multi_az
-  backup_retention_days  = var.backup_retention_days
-  kms_key_id             = module.kms.key_id
+  mysql_instance_class      = var.mysql_instance_class
+  dms_instance_class        = var.dms_instance_class
+  db_username               = var.db_username
+  db_password               = module.secrets_manager.secret_arns["db_password"]
+  db_family                 = var.db_family
+  multi_az                  = var.multi_az
+  backup_retention_days     = var.backup_retention_days
 }
 
 # Storage Module
 module "storage" {
   source = "./modules/storage"
 
-  subnet_id                  = module.networking.private_subnet_ids[0]
-  vpc_endpoint_id            = var.vpc_endpoint_id
-  fsx_storage_capacity       = var.fsx_storage_capacity
-  fsx_throughput_capacity    = var.fsx_throughput_capacity
-  ad_dns_ips                 = var.ad_dns_ips
-  ad_domain_name             = var.ad_domain_name
-  ad_password                = module.secrets_manager.secret_arns["ad_password"]
-  ad_username                = var.ad_username
-  ad_ou_path                 = var.ad_ou_path
-  s3_bucket_name             = var.s3_bucket_name
-  storage_gateway_role_arn   = var.storage_gateway_role_arn
-  datasync_role_arn          = var.datasync_role_arn
+  subnet_id                    = module.networking.private_subnet_ids[0]
+  vpc_endpoint_id              = var.vpc_endpoint_id
+  fsx_storage_capacity         = var.fsx_storage_capacity
+  fsx_throughput_capacity      = var.fsx_throughput_capacity
+  ad_dns_ips                   = var.ad_dns_ips
+  ad_domain_name               = var.ad_domain_name
+  ad_password                  = module.secrets_manager.secret_arns["ad_password"]
+  ad_username                  = var.ad_username
+  ad_ou_path                   = var.ad_ou_path
+  s3_bucket_name               = var.s3_bucket_name
+  storage_gateway_role_arn     = var.storage_gateway_role_arn
+  datasync_role_arn            = var.datasync_role_arn
   datasync_source_location_arn = var.datasync_source_location_arn
-  kms_key_id                 = module.kms.key_id
 }
 
 # DRS Module
@@ -204,12 +202,11 @@ module "drs" {
 module "monitoring" {
   source = "./modules/monitoring"
 
-  aws_region                   = var.aws_region
-  source_server_ids            = var.monitoring_source_server_ids
+  aws_region                        = var.aws_region
+  source_server_ids                 = var.monitoring_source_server_ids
   replication_lag_threshold_seconds = var.replication_lag_threshold_seconds
-  rto_threshold_minutes        = var.rto_threshold_minutes
-  sns_topic_arn                = var.sns_topic_arn
-  kms_key_id                   = module.kms.key_id
+  rto_threshold_minutes             = var.rto_threshold_minutes
+  sns_topic_arn                     = var.sns_topic_arn
 }
 
 # Security Compliance Module
@@ -231,10 +228,10 @@ module "security_compliance" {
 module "logging" {
   source = "./modules/logging"
 
-  prefix     = "${var.project}-${var.environment}"
-  account_id = data.aws_caller_identity.current.account_id
-  kms_key_id = module.kms.key_id
-  vpc_id     = module.networking.vpc_id
+  prefix      = "${var.project}-${var.environment}"
+  account_id  = data.aws_caller_identity.current.account_id
+  kms_key_id  = module.kms.key_id
+  vpc_id      = module.networking.vpc_id
   admin_email = var.admin_email
 
   tags = {

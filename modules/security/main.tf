@@ -21,7 +21,7 @@ resource "aws_security_group" "drs_sg" {
   }
 
   # Add other specific ingress rules as needed
-  
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -40,7 +40,7 @@ resource "aws_security_group" "drs_sg" {
 
 # Network ACLs for additional protection
 resource "aws_network_acl" "drs_nacl" {
-  vpc_id = var.vpc_id
+  vpc_id     = var.vpc_id
   subnet_ids = var.subnet_ids
 
   # Example NACL rules

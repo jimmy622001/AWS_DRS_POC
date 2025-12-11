@@ -68,9 +68,9 @@ AWS_DRS_POC/
     ├── storage/              # Storage resources configuration
     ├── monitoring/           # Monitoring setup
     ├── direct_connect/       # Direct Connect configuration
-    ├── analytics/            # Analytics configuration
-    ├── cicd/                 # CI/CD pipeline configuration
-    └── infracost/            # Cost analysis tools
+    ├── security/             # Security configuration
+    ├── logging/              # Logging configuration
+    └── security_compliance/  # Security compliance
 ```
 
 Getting Started
@@ -87,3 +87,14 @@ This project is configured to use:
 - **Failover region**: London (eu-west-2)
 
 These regions were selected for their proximity, compliance with European data regulations, and complete service availability.
+
+## Recent Updates
+
+### Module Removals
+Several modules have been removed to streamline the architecture and focus on core DR functionality:
+
+- **Analytics Module**: Removed as analytics workloads are not relevant in a DR environment
+- **CICD Module**: Removed as CI/CD pipelines are not typically needed in DR scenarios
+- **Infracost Module**: Removed as it's a development utility rather than core infrastructure
+
+See [MODULE_REMOVALS.md](MODULE_REMOVALS.md) for detailed information about these changes and their benefits.

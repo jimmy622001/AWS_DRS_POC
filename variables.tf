@@ -333,37 +333,19 @@ variable "avg_server_size_gb" {
 variable "app_server_source_ids" {
   description = "List of app server source IDs for recovery"
   type        = list(string)
-  default     = []  # Default empty list for simplicity
+  default     = [] # Default empty list for simplicity
 }
 
 variable "db_server_source_ids" {
   description = "List of database server source IDs for recovery"
   type        = list(string)
-  default     = []  # Default empty list for simplicity
+  default     = [] # Default empty list for simplicity
 }
 
 variable "file_server_source_ids" {
   description = "List of file server source IDs for recovery"
   type        = list(string)
-  default     = []  # Default empty list for simplicity
-}
-
-variable "app_server_source_ids" {
-  description = "List of app server source IDs for recovery"
-  type        = list(string)
-  default     = []  # Default empty list for simplicity
-}
-
-variable "db_server_source_ids" {
-  description = "List of database server source IDs for recovery"
-  type        = list(string)
-  default     = []  # Default empty list for simplicity
-}
-
-variable "file_server_source_ids" {
-  description = "List of file server source IDs for recovery"
-  type        = list(string)
-  default     = []  # Default empty list for simplicity
+  default     = [] # Default empty list for simplicity
 }
 
 # Monitoring variables
@@ -403,7 +385,7 @@ variable "dx_bandwidth" {
 variable "dx_location" {
   description = "AWS Direct Connect location code"
   type        = string
-  default     = "EqDC2"  # This should be replaced with an actual location code
+  default     = "EqDC2" # This should be replaced with an actual location code
 }
 
 variable "on_prem_bgp_asn" {
