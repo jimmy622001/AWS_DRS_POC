@@ -1,10 +1,39 @@
 # Main AWS provider
 provider "aws" {
   region = var.aws_region
+
+  # Allow for AWS API retries
+  default_tags {
+    tags = {
+      Environment = var.environment
+      Project     = var.project
+      ManagedBy   = "Terraform"
+    }
+  }
 }
 
-# Data source to get AWS account ID
+# Data sources
 data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
+# Centralized notifications
+module "notifications" {
+  source = "./modules/notifications"
+
+  create_topic = var.create_sns_topic
+  topic_name   = var.sns_topic_name != "" ? var.sns_topic_name : "${var.project}-${var.environment}-dr-notifications"
+  admin_email  = var.admin_email
+  prefix       = "${var.project}-${var.environment}"
+  environment  = var.environment
+  kms_key_id   = module.kms.key_id
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+    Component   = "Monitoring"
+  }
+}
 
 # Networking Module
 module "networking" {
@@ -206,7 +235,28 @@ module "monitoring" {
   source_server_ids                 = var.monitoring_source_server_ids
   replication_lag_threshold_seconds = var.replication_lag_threshold_seconds
   rto_threshold_minutes             = var.rto_threshold_minutes
-  sns_topic_arn                     = var.sns_topic_arn
+  sns_topic_arn                     = module.notifications.topic_arn
+}
+
+
+# DR Testing Module
+module "dr_testing" {
+  count  = var.enable_automated_testing ? 1 : 0
+  source = "./modules/dr_testing"
+
+  prefix                   = "${var.project}-${var.environment}"
+  step_function_arn        = module.recovery_orchestration.step_function_arn
+  source_server_ids        = concat(var.app_server_source_ids, var.db_server_source_ids, var.file_server_source_ids)
+  sns_topic_arn            = module.notifications.topic_arn
+  rto_threshold_seconds    = var.rto_threshold_minutes * 60
+  aws_region               = var.aws_region
+  test_schedule_expression = var.dr_test_schedule_expression
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+    Component   = "DR-Testing"
+  }
 }
 
 # Security Compliance Module

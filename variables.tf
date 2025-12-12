@@ -1,7 +1,20 @@
 # General variables
 variable "aws_region" {
-  description = "AWS region for resources"
+  description = "AWS region where resources will be created"
   type        = string
+  default     = "eu-west-1" # Default to Ireland region
+}
+
+variable "project" {
+  description = "Project name used for resource naming and tagging"
+  type        = string
+  default     = "banking-dr"
+}
+
+variable "environment" {
+  description = "Environment name (e.g., prod, staging, dev)"
+  type        = string
+  default     = "prod"
 }
 
 variable "allowed_ips" {
@@ -11,9 +24,14 @@ variable "allowed_ips" {
 }
 
 variable "admin_email" {
-  description = "Email address for security notifications"
+  description = "Email address for security notifications and alerts"
   type        = string
-  default     = "admin@example.com" # Replace with your email
+  default     = null
+
+  validation {
+    condition     = var.admin_email == null || can(regex("^[^@]+@[^@]+$", var.admin_email))
+    error_message = "The admin_email must be a valid email address or null."
+  }
 }
 
 variable "vpn_password" {
@@ -362,11 +380,47 @@ variable "replication_lag_threshold_seconds" {
 variable "rto_threshold_minutes" {
   description = "Recovery Time Objective threshold in minutes"
   type        = number
+  default     = 15 # 15-minute RTO target
+
+  validation {
+    condition     = var.rto_threshold_minutes > 0 && var.rto_threshold_minutes <= 30
+    error_message = "RTO threshold must be between 1 and 30 minutes for this implementation."
+  }
+}
+
+variable "dr_test_schedule_expression" {
+  description = "AWS EventBridge schedule expression for automated DR testing (cron format)"
+  type        = string
+  default     = "cron(0 1 ? * SUN *)" # Default: Weekly on Sunday at 1 AM
+}
+
+variable "enable_automated_testing" {
+  description = "Enable automated DR testing"
+  type        = bool
+  default     = true
 }
 
 variable "sns_topic_arn" {
-  description = "ARN of the SNS topic for alarms"
+  description = "ARN of an existing SNS topic for alarms and notifications. If not provided, one will be created."
   type        = string
+  default     = ""
+
+  validation {
+    condition     = var.sns_topic_arn == "" || can(regex("^arn:aws:sns:", var.sns_topic_arn))
+    error_message = "The sns_topic_arn must be a valid SNS ARN or an empty string."
+  }
+}
+
+variable "sns_topic_name" {
+  description = "Custom name for the SNS topic. If not provided, one will be generated."
+  type        = string
+  default     = ""
+}
+
+variable "create_sns_topic" {
+  description = "Whether to create a new SNS topic for notifications"
+  type        = bool
+  default     = true
 }
 
 # Direct Connect variables
@@ -398,18 +452,6 @@ variable "aws_side_asn" {
   description = "BGP ASN for AWS side"
   type        = number
   default     = 64512
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dr"
-}
-
-variable "project" {
-  description = "Project name"
-  type        = string
-  default     = "banking-dr"
 }
 
 # Source region for disaster recovery

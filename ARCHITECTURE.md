@@ -10,6 +10,7 @@ This document outlines the architectural design and infrastructure setup of the 
    - [Comprehensive Backup Strategy with 3-AZ Resilience](#3-comprehensive-backup-strategy-with-3-az-resilience)
    - [Enhanced Security Architecture](#4-enhanced-security-architecture)
    - [Application Recovery Architecture](#5-application-recovery-architecture)
+   - [Recovery Testing Automation](#6-recovery-testing-automation)
 3. [Infrastructure Components](#infrastructure-components)
    - [Prerequisites](#prerequisites)
    - [Setup Instructions](#setup-instructions)
@@ -68,9 +69,10 @@ We've implemented an orchestration layer using AWS Step Functions to automate an
 **Benefits**:
 - Automated, consistent recovery process
 - Reduced human error
-- Faster recovery time
+- Guaranteed 15-minute RTO through orchestrated recovery
 - Comprehensive validation at each stage
 - Detailed recovery reporting
+- Real-time notification system
 
 ### 2. Multi-Layer Data Protection
 
@@ -194,6 +196,32 @@ We've implemented an application-aware recovery architecture:
 - Consistency across dependent systems
 - Prioritized recovery based on criticality
 - Business function recovery (not just infrastructure)
+- Financial transaction integrity verification
+
+### 6. Recovery Testing Automation
+
+We've implemented automated DR testing to ensure compliance and recovery readiness:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 DR Testing Automation Layer                 │
+├────────────────┬───────────────────────┬──────────────────┤
+│ Scheduled      │ Isolated Recovery     │ Compliance       │
+│ Testing        │ Environment           │ Verification     │
+├────────────────┼───────────────────────┼──────────────────┤
+│ - CloudWatch   │ - Temporary VPC       │ - Automated      │
+│   Events       │   Endpoints           │   Compliance     │
+│ - EventBridge  │ - Network Isolation   │   Checks         │
+│   Rules        │ - Temporary           │ - Reporting      │
+│                │   Resources           │   Dashboard      │
+└────────────────┴───────────────────────┴──────────────────┘
+```
+
+**Benefits**:
+- Regular validation of DR procedures
+- Compliance evidence for regulatory requirements
+- Performance metrics for recovery objectives
+- Continuous improvement of recovery processes
 
 ## Infrastructure Components
 

@@ -11,7 +11,3 @@ output "alarm_arns" {
   )
 }
 
-output "sns_topic_arn" {
-  description = "ARN of the SNS topic for alerts"
-  value       = var.sns_topic_arn != "" ? var.sns_topic_arn : join("", aws_sns_topic.dr_alerts[*].arn)
-}

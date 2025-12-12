@@ -68,8 +68,3 @@ resource "aws_cloudwatch_metric_alarm" "recovery_time_objective" {
   alarm_actions       = [var.sns_topic_arn]
 }
 
-# SNS Topic for DR alerts if one is not provided
-resource "aws_sns_topic" "dr_alerts" {
-  count = var.sns_topic_arn == "" ? 1 : 0
-  name  = "dr-alerts-topic"
-}
