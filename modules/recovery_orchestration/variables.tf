@@ -29,3 +29,13 @@ variable "source_server_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "enable_security_lambda_arn" {
+  description = "ARN of the Lambda function to enable security services during DR failover"
+  type        = string
+}
+
+variable "disable_security_lambda_arn" {
+  description = "ARN of the Lambda function to disable security services when returning to normal operations"
+  type        = string
+}

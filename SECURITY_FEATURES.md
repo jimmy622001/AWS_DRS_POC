@@ -1,163 +1,94 @@
-# Security Features for AWS DRS Banking Solution
+# Cost-Efficient, On-Demand Security for AWS DR Environment
 
-This document outlines the security features implemented in the AWS DRS solution to meet the stringent requirements of banking and financial institutions.
+This document describes our implementation of cost-efficient, on-demand security for the AWS DR Environment.
 
-## Key Security Features
+## Overview
 
-### 1. Automated Recovery Orchestration
+We've successfully implemented a solution that provides advanced security capabilities that activate ONLY during an actual DR failover, avoiding unnecessary ongoing costs. This approach ensures comprehensive security during failover when you need it, without the ongoing costs during normal operation.
 
-We have implemented AWS Step Functions to automate and control the DR recovery process:
+## Architecture Components
 
-- **Pre-Recovery Checks**: Automated validation of prerequisites before recovery
-  - Verification of target environment readiness
-  - Security posture validation
-  - Resource availability confirmation
-  - Connectivity validation
+### 1. On-Demand Security Module
 
-- **Orchestrated Recovery Workflow**:
-  - Prioritized recovery based on application criticality
-  - Transaction-consistent recovery for financial applications
-  - Health checks at each recovery stage
-  - Automatic rollback capabilities if issues detected
+This module manages advanced security features that are:
+- Pre-provisioned but dormant: Resources are defined in Terraform but not actively consuming billable resources
+- Automatically activated during DR: Part of the DR recovery workflow
+- Automatically deactivated after DR ends: To prevent ongoing costs
 
-- **Post-Recovery Validation**:
-  - Data integrity verification
-  - Application functionality testing
-  - Security configuration validation
-  - Compliance check automation
+The module includes:
+- **AWS WAF WebACL**: Configured but not associated with any resources until activated
+- **GuardDuty Detector**: Created in a disabled state, activated only during failover
+- **Shield Advanced Protection**: Pre-configured but not active until needed
 
-### 2. Advanced Data Protection
+### 2. Lambda Functions for Security Management
 
-Enhanced data protection mechanisms specifically for banking data:
+Two Lambda functions manage the activation/deactivation of security services:
+- **EnableSecurityLambda**: Activates WAF, GuardDuty, and Shield during DR failover
+- **DisableSecurityLambda**: Deactivates these services when returning to normal operations
 
-- **AWS Macie Implementation**:
-  - Automatic sensitive data discovery and classification
-  - Continuous monitoring for unauthorized access or exfiltration
-  - Custom data identifiers for banking-specific information:
-    - Account numbers
-    - Card data
-    - Transaction details
-    - Personal identifiable information (PII)
+### 3. Integration with Recovery Orchestration
 
-- **Data Loss Prevention (DLP)**:
-  - Real-time monitoring of data access and movement
-  - Automated remediation actions for policy violations
-  - Integration with CloudWatch for alerting
-  - Secure logging of DLP events
+The recovery workflow includes:
+- **Pre-Recovery Security Activation**: As one of the first steps in recovery
+- **Post-Recovery Security Validation**: Ensures security services are running
+- **Cleanup Security Step**: Deactivates security services if DR environment is decommissioned
 
-- **Data Classification Framework**:
-  - Automatic tagging based on sensitivity
-  - Policy-based controls aligned with classification levels
-  - Resource tagging for compliance mapping
-  - Custom identifiers for banking data
+### 4. Cost Benefits
 
-### 3. Comprehensive Backup Strategy
+This approach provides:
+- Zero ongoing costs for WAF inspection until activated during failover
+- No GuardDuty costs during normal operations
+- No Shield Advanced costs during normal operations
+- Full security coverage when the DR environment becomes active
 
-Implemented a thorough approach to protect critical data:
+## Security Features Details
 
-- **Tiered Recovery Strategy**:
-  - Full recovery to AWS Ireland region
-  - Critical data protected with multiple backup mechanisms
-  - Automated export of critical snapshots for additional protection
+### AWS WAF with Banking-Specific Rules:
+- SQL Injection protection
+- Cross-site scripting protection
+- Banking-specific rules like large money transfer inspection
 
-- **Backup Synchronization**:
-  - Secure API-based synchronization 
-  - Encryption for all data transfers
-  - Metadata preservation for regulatory compliance
+### GuardDuty with Financial Threat Detection:
+- Threat detection for banking workloads
+- Unusual access pattern detection
+- Cryptocurrency threat detection
 
-- **Recovery Testing**:
-  - Documented procedures for recovery
-  - Regular validation of restoration processes
-  - Automated reporting on backup integrity
+### Shield Advanced Protection:
+- DDoS protection for critical banking interfaces
+- Automatic application layer DDoS mitigation
 
-### 4. Enhanced Compliance Mapping
+## How It Works in Practice
 
-Comprehensive mapping of controls to banking regulations:
+### Normal Operations:
+- Security resources are defined in Terraform but remain inactive
+- No costs are incurred for WAF, GuardDuty, or Shield
 
-- **GDPR Compliance**:
-  - Data subject rights implementation
-  - Data processing documentation
-  - Cross-border transfer controls
-  - Breach notification procedures
+### During DR Failover:
+1. Step Functions workflow executes the `EnableSecurityLambda`
+2. Lambda activates WAF, GuardDuty, and associates Shield protections
+3. Full security posture is established before applications become available
 
-- **FFIEC Compliance**:
-  - Information security controls aligned with FFIEC guidance
-  - Business continuity planning documentation
-  - Vendor management procedures
-  - Audit and examination readiness
+### During DR Operations:
+- All security services are active and protecting the environment
+- Normal security costs apply during this period (but only during failover)
 
-- **PCI DSS**:
-  - Cardholder data protection in DR environment
-  - Network segmentation for payment data
-  - Encryption of payment information
-  - Access controls and monitoring
-
-- **GLBA**:
-  - Customer information protection
-  - Privacy notices and procedures
-  - Pretexting protection
-  - Regular risk assessments
-
-### 5. Detailed Recovery Runbooks
-
-Application-specific recovery procedures for banking systems:
-
-- **Core Banking System Recovery**:
-  - Database consistency validation
-  - Inter-system dependency mapping
-  - Transaction replay mechanisms
-  - Data reconciliation procedures
-
-- **Payment Systems Recovery**:
-  - Payment gateway configuration
-  - Payment processor connections
-  - Fraud detection system integration
-  - Regulatory reporting systems
-
-- **Customer-Facing Systems**:
-  - Online banking platform recovery
-  - Mobile application backend restoration
-  - Customer authentication systems
-  - Account access and management systems
-
-- **Regulatory Reporting Systems**:
-  - Financial reporting database recovery
-  - Regulatory compliance reporting tools
-  - Historical data preservation
-  - Audit trail maintenance
+### When Returning to Production:
+1. `DisableSecurityLambda` deactivates the security services
+2. Costs for these services stop accruing
 
 ## Implementation Details
 
-These security features are implemented through:
+The implementation consists of:
 
-1. **Terraform Modules**:
-   - Recovery Orchestration module (modules/recovery_orchestration)
-   - Data Protection module (modules/data_protection)
-   - Enhanced IAM module (modules/iam)
-   - Enhanced KMS module (modules/kms)
-   - Enhanced Security Compliance module (modules/security_compliance)
+1. A dedicated Terraform module (`on_demand_security`) that defines the security resources
+2. Lambda functions for enabling and disabling security services
+3. Integration with the existing recovery orchestration Step Function
+4. Updates to IAM policies for proper permissions
 
-2. **AWS Services**:
-   - AWS Step Functions for orchestration
-   - AWS Macie for sensitive data discovery
-   - AWS KMS for comprehensive encryption
-   - AWS Security Hub for compliance monitoring
-   - AWS Backup for cross-region and cross-account backups
-   - AWS Lambda for automation
+## Usage
 
-3. **Documentation**:
-   - Detailed recovery runbooks (docs/detailed_recovery_runbooks.md)
-   - Data classification framework (docs/data_classification_framework.md)
-   - Recovery strategy (docs/replication_strategy.md)
-   - Regulatory compliance framework (docs/regulatory_compliance_framework.md)
+The on-demand security module is integrated directly into the main Terraform configuration and requires no additional steps to deploy. The security services will automatically activate during a DR failover event.
 
-## Validation and Testing
+## Conclusion
 
-Each security feature includes:
-
-- Automated compliance validation tests
-- Recovery testing procedures
-- Security posture verification
-- Documentation for audit purposes
-
-These features ensure that the AWS DRS solution not only provides effective disaster recovery capabilities but also meets the stringent security and compliance requirements of banking and financial institutions.
+This on-demand security approach provides the best of both worlds - comprehensive security during failover when you need it, without the ongoing costs during normal operation. It ensures that your DR environment is fully protected only when it becomes active, following security best practices while optimizing costs.

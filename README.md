@@ -28,75 +28,62 @@ This enterprise-grade disaster recovery (DR) solution is specifically designed f
 - **Advanced DLP**: Data Loss Prevention for sensitive financial information
 - **Automated Validation**: Pre and post-recovery integrity checks
 
-## DR Solution Options
+## Getting Started
 
+To understand and implement this solution:
 
-| Feature       | Option 1: AWS DRS with VPN         | Option 2: AWS DRS with Direct Connect + VPN (Hybrid) |
-| ------------- | ---------------------------------- | ---------------------------------------------------- |
-| Connectivity  | Site-to-Site VPN                   | Direct Connect + Client VPN                          |
-| Performance   | Good                               | Excellent                                            |
-| Reliability   | Standard                           | High (99.99% SLA)                                    |
-| Cost          | Lower                              | Higher                                               |
-| Complexity    | Simple                             | Moderate                                             |
-| Compliance    | Standard                           | Enhanced                                             |
-| Documentation | [DRS-proposal.md](DRS-proposal.md) | [HYBRID-PROPOSAL.md](HYBRID-PROPOSAL.md)             |
+1. Start with our [Getting Started Guide](GETTING_STARTED.md)
+2. Review the [Solution Overview](docs/01-solution-overview.md) and [Architecture Details](docs/10-architecture-details.md)
+3. Follow the [Terraform Implementation](docs/20-terraform-implementation.md) guide for deployment
 
-### Option 1: AWS DRS with VPN
+## Documentation
 
-![DR AWS.png](docs/DR%20AWS.png)
+Our documentation is organized into several categories for easy navigation:
 
-A secure, cost-effective solution using AWS Elastic Disaster Recovery Service (DRS) with VPN connectivity for replication and access:
+### Overview Documents
+- [Solution Overview](docs/01-solution-overview.md)
+- [Options Comparison](docs/02-options-comparison.md)
 
-- Site-to-Site VPN for encrypted connectivity between on-premises and AWS
-- Client VPN for secure remote user access during DR events
-- Block-level replication with sub-second RPO
-- Minutes RTO for critical banking systems
-- Comprehensive encryption for data at rest and in transit
-- Automated recovery orchestration for critical applications
-- Detailed recovery runbooks for banking applications
-- Continuous compliance monitoring and reporting
+### Technical Documentation
+- [Architecture Details](docs/10-architecture-details.md)
+- [Security Features](docs/11-security-features.md)
+- [Networking](docs/12-networking.md)
 
-Best for: Financial institutions prioritizing cost-effectiveness while maintaining high security and compliance standards.
+### Implementation Guides
+- [Terraform Implementation](docs/20-terraform-implementation.md)
+- [Deployment Guide](docs/21-deployment-guide.md)
+- [Testing Procedures](docs/22-testing-procedures.md)
 
-### Option 2: AWS DRS with Direct Connect + VPN (Hybrid)
+### Business Resources
+- [Cost Comparison](docs/30-cost-comparison.md)
+- [Regulatory Compliance](docs/31-regulatory-compliance.md)
 
-![DRAWS.png](assets/DR AWS.png)
+### Operational Documents
+- [Recovery Runbooks](docs/40-recovery-runbooks.md)
+- [Maintenance Guide](docs/41-maintenance-guide.md)
 
-An enhanced DR solution combining the benefits of Direct Connect and VPN, specifically designed for banks with the highest compliance requirements:
-
-- AWS Direct Connect for dedicated, high-performance, private replication
-- Client VPN for secure, flexible user access during DR events
-- SLA-backed connectivity (99.99% availability)
-- Enhanced security with private network connectivity
-- Superior regulatory compliance for financial institutions
-- Advanced data loss prevention for sensitive banking information
-- Automated compliance reporting and real-time monitoring
-
-Best for: Banking organizations requiring the highest reliability, performance, and regulatory compliance.
-
-### Cost and Benefit Analysis
-
-Review our [cost comparison document](docs/cost-comparison.md) to understand the financial implications of each option and the return on security investment.
+For a full list of documentation, see the [Documentation Index](docs/README.md).
 
 ## Project Structure
 
 ```
 AWS_DRS_POC/
 ├── README.md                 # Project overview and key features
-├── DRS-proposal.md           # Option 1: VPN-only solution details
-├── HYBRID-PROPOSAL.md        # Option 2: Hybrid with Direct Connect details
-├── ARCHITECTURE.md           # Architecture and infrastructure details
-├── SECURITY_FEATURES.md      # Security features details
-├── docs/                     # Additional documentation
-│   ├── cost-comparison.md             # Cost comparison between options
-│   ├── data_classification_framework.md # Data classification and tagging strategy
-│   ├── detailed_recovery_runbooks.md   # Application-specific recovery procedures
-│   ├── hybrid_connectivity.md         # Hybrid connectivity details
-│   ├── recovery_strategy.md           # Backup and recovery strategy
-│   ├── regions.md                     # Details about the AWS target region
-│   ├── regulatory_compliance_framework.md # Regulatory mapping (GDPR, FFIEC, etc.)
-│   ├── replication_strategy.md        # Replication strategy documentation
-│   └── terraform-implementation.md    # Technical implementation details
+├── GETTING_STARTED.md        # Quick start guide for new users
+├── docs/                     # Comprehensive documentation
+│   ├── README.md                     # Documentation index
+│   ├── 01-solution-overview.md       # Complete solution overview
+│   ├── 02-options-comparison.md      # Comparison between DR approaches
+│   ├── 10-architecture-details.md    # Detailed architecture
+│   ├── 11-security-features.md       # Security controls and implementation
+│   ├── 12-networking.md              # Network architecture
+│   ├── 20-terraform-implementation.md # Terraform implementation details
+│   ├── 21-deployment-guide.md        # Deployment instructions
+│   ├── 22-testing-procedures.md      # Testing procedures
+│   ├── 30-cost-comparison.md         # Cost analysis
+│   ├── 31-regulatory-compliance.md   # Regulatory requirements
+│   ├── 40-recovery-runbooks.md       # Recovery procedures
+│   └── 41-maintenance-guide.md       # Maintenance guide
 └── modules/                  # Terraform modules
     ├── compute/              # Compute resources configuration
     ├── database/             # Database resources configuration 
@@ -108,75 +95,10 @@ AWS_DRS_POC/
     ├── logging/              # Comprehensive logging configuration
     ├── monitoring/           # Enhanced monitoring and alerting
     ├── networking/           # VPC, subnets, VPN configuration
+    ├── on_demand_security/   # Cost-efficient security activated only during DR
     ├── recovery_orchestration/ # Automated recovery workflows
     ├── secrets_manager/      # Secure secrets management
     ├── security/             # Security configuration
     ├── security_compliance/  # Compliance monitoring and reporting
     └── storage/              # Storage resources configuration
 ```
-
-## Getting Started
-
-1. **Understand the Solution**:
-
-   - Review both DR options in their respective documentation: [DRS-proposal.md](DRS-proposal.md) and [HYBRID-PROPOSAL.md](HYBRID-PROPOSAL.md)
-   - Review the [regulatory compliance framework](docs/regulatory_compliance_framework.md) to understand how this solution meets banking requirements
-   - Study the [data classification framework](docs/data_classification_framework.md) to understand protection mechanisms
-2. **Compare Options**:
-
-   - Analyze the cost implications using the [cost comparison document](docs/cost-comparison.md)
-   - Review the [recovery strategy](docs/replication_strategy.md) for risk mitigation
-   - Understand the [recovery runbooks](docs/detailed_recovery_runbooks.md) for banking applications
-3. **Implementation**:
-
-   - Select the most appropriate option based on your security and compliance requirements
-   - Review the [technical implementation details](docs/terraform-implementation.md) for Terraform code
-   - Understand the [region configuration](docs/regions.md) for the AWS target region (Ireland)
-   - Follow the implementation instructions in the [architecture and infrastructure document](ARCHITECTURE.md)
-4. **Testing and Validation**:
-
-   - Perform recovery testing following the runbooks
-   - Validate compliance using the automated compliance checks
-   - Test the automated recovery orchestration workflows
-   - Verify data protection mechanisms are functioning as expected
-
-This project is configured to use:
-
-- **Target region**: Ireland (eu-west-1)
-
-This region was selected for its compliance with European data regulations and complete service availability.
-
-## Security and Compliance Features
-
-### Advanced Security Controls
-
-- **Comprehensive Encryption**: All data encrypted at rest and in transit using KMS
-- **Secure Access Management**: Least privilege IAM policies and multi-factor authentication
-- **Network Security**: Security groups, NACLs, VPC endpoints, and private connectivity
-- **Monitoring and Alerting**: Real-time security monitoring with CloudWatch and Security Hub
-
-### Banking Regulatory Compliance
-
-- **GDPR Compliance**: Data protection controls and documentation
-- **FFIEC Requirements**: Meets financial institution examination requirements
-- **PCI DSS**: Protection for cardholder data in the DR environment
-- **GLBA**: Controls for safeguarding customer financial information
-
-### Data Protection
-
-- **Data Classification**: Automatic identification and tagging of sensitive data
-- **Data Loss Prevention**: Macie-based DLP with custom identifiers for financial data
-- **Data Sovereignty**: Controls to maintain data within specified jurisdictions
-- **Data Validation**: Automated checks for data integrity before and after recovery
-
-## Security and Compliance Design
-
-### Banking-Specific Security Features
-
-- **3-AZ Architecture**: Maximum resilience with resources distributed across three availability zones
-- **Automated Recovery Orchestration**: AWS Step Functions for controlled recovery processes
-- **Advanced Data Protection**: AWS Macie and custom DLP for sensitive financial data
-- **Enhanced Compliance Mapping**: Detailed mapping to banking regulations
-- **Detailed Recovery Runbooks**: Application-specific recovery procedures for banking systems
-
-See [SECURITY_FEATURES.md](SECURITY_FEATURES.md) for detailed information about these security features.

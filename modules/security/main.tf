@@ -43,23 +43,30 @@ resource "aws_network_acl" "drs_nacl" {
   vpc_id     = var.vpc_id
   subnet_ids = var.subnet_ids
 
-  # Example NACL rules
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 443
-    to_port    = 443
+  # HTTPS access restricted to allowed IPs only
+  dynamic "ingress" {
+    for_each = var.allowed_ips
+    content {
+      protocol   = "tcp"
+      rule_no    = 100 + index(var.allowed_ips, ingress.value)
+      action     = "allow"
+      cidr_block = ingress.value
+      from_port  = 443
+      to_port    = 443
+    }
   }
 
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 110
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 1024
-    to_port    = 65535
+  # Ephemeral ports access restricted to allowed IPs only
+  dynamic "ingress" {
+    for_each = var.allowed_ips
+    content {
+      protocol   = "tcp"
+      rule_no    = 200 + index(var.allowed_ips, ingress.value)
+      action     = "allow"
+      cidr_block = ingress.value
+      from_port  = 1024
+      to_port    = 65535
+    }
   }
 
   # Restrict SSH to allowed IPs
@@ -75,20 +82,22 @@ resource "aws_network_acl" "drs_nacl" {
     }
   }
 
+  # Allow HTTPS to specific trusted destinations
   egress {
     protocol   = "tcp"
     rule_no    = 100
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
+    cidr_block = "0.0.0.0/0" # Consider limiting this if possible based on your requirements
     from_port  = 443
     to_port    = 443
   }
 
+  # Allow return traffic on ephemeral ports
   egress {
     protocol   = "tcp"
     rule_no    = 110
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
+    cidr_block = "0.0.0.0/0" # Needed for return traffic
     from_port  = 1024
     to_port    = 65535
   }

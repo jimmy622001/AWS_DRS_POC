@@ -168,6 +168,12 @@ variable "create_load_balancer" {
   type        = bool
 }
 
+variable "certificate_arn" {
+  description = "ARN of the SSL certificate for HTTPS listener"
+  type        = string
+  default     = "" # This should be replaced with an actual certificate ARN
+}
+
 # Database variables
 variable "create_sql_server" {
   description = "Flag to determine if SQL Server should be created"
@@ -490,4 +496,11 @@ variable "data_classification_tags" {
     "DataSteward"     = "dr-team@example.com"
     "RetentionPeriod" = "7Y"
   }
+}
+
+# On-Demand Security variables
+variable "create_shield_protection" {
+  description = "Whether to create Shield Advanced protection (only becomes active during DR failover)"
+  type        = bool
+  default     = true
 }

@@ -17,22 +17,23 @@ resource "aws_db_parameter_group" "dr_db_parameter_group" {
 }
 
 resource "aws_db_instance" "dr_sql_server" {
-  count                   = var.dr_activated && var.create_sql_server ? 1 : 0
-  allocated_storage       = var.sql_server_storage_gb
-  storage_type            = "gp3"
-  engine                  = "sqlserver-ee"
-  engine_version          = var.sql_server_version
-  instance_class          = var.sql_server_instance_class
-  db_name                 = null # Not supported for SQL Server
-  username                = var.db_username
-  password                = var.db_password
-  db_subnet_group_name    = aws_db_subnet_group.dr_db_subnet_group.name
-  parameter_group_name    = aws_db_parameter_group.dr_db_parameter_group.name
-  skip_final_snapshot     = true
-  license_model           = "license-included"
-  multi_az                = var.multi_az
-  backup_retention_period = var.backup_retention_days
-  vpc_security_group_ids  = var.security_group_ids
+  count                               = var.dr_activated && var.create_sql_server ? 1 : 0
+  allocated_storage                   = var.sql_server_storage_gb
+  storage_type                        = "gp3"
+  engine                              = "sqlserver-ee"
+  engine_version                      = var.sql_server_version
+  instance_class                      = var.sql_server_instance_class
+  db_name                             = null # Not supported for SQL Server
+  username                            = var.db_username
+  password                            = var.db_password
+  db_subnet_group_name                = aws_db_subnet_group.dr_db_subnet_group.name
+  parameter_group_name                = aws_db_parameter_group.dr_db_parameter_group.name
+  skip_final_snapshot                 = true
+  license_model                       = "license-included"
+  multi_az                            = var.multi_az
+  backup_retention_period             = var.backup_retention_days
+  vpc_security_group_ids              = var.security_group_ids
+  iam_database_authentication_enabled = true
 
   tags = {
     Name = "dr-sql-server"
@@ -40,21 +41,22 @@ resource "aws_db_instance" "dr_sql_server" {
 }
 
 resource "aws_db_instance" "dr_mysql" {
-  count                   = var.dr_activated && var.create_mysql ? 1 : 0
-  allocated_storage       = var.mysql_storage_gb
-  storage_type            = "gp3"
-  engine                  = "mysql"
-  engine_version          = var.mysql_version
-  instance_class          = var.mysql_instance_class
-  db_name                 = "drdb"
-  username                = var.db_username
-  password                = var.db_password
-  db_subnet_group_name    = aws_db_subnet_group.dr_db_subnet_group.name
-  parameter_group_name    = aws_db_parameter_group.dr_db_parameter_group.name
-  skip_final_snapshot     = true
-  multi_az                = var.multi_az
-  backup_retention_period = var.backup_retention_days
-  vpc_security_group_ids  = var.security_group_ids
+  count                               = var.dr_activated && var.create_mysql ? 1 : 0
+  allocated_storage                   = var.mysql_storage_gb
+  storage_type                        = "gp3"
+  engine                              = "mysql"
+  engine_version                      = var.mysql_version
+  instance_class                      = var.mysql_instance_class
+  db_name                             = "drdb"
+  username                            = var.db_username
+  password                            = var.db_password
+  db_subnet_group_name                = aws_db_subnet_group.dr_db_subnet_group.name
+  parameter_group_name                = aws_db_parameter_group.dr_db_parameter_group.name
+  skip_final_snapshot                 = true
+  multi_az                            = var.multi_az
+  backup_retention_period             = var.backup_retention_days
+  vpc_security_group_ids              = var.security_group_ids
+  iam_database_authentication_enabled = true
 
   tags = {
     Name = "dr-mysql"

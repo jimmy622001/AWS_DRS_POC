@@ -65,6 +65,12 @@ resource "aws_instance" "app_servers" {
     id = aws_launch_template.app_servers.id
   }
 
+  # Ensure root block device is encrypted
+  root_block_device {
+    encrypted  = true
+    kms_key_id = var.kms_key_id
+  }
+
   tags = merge(
     var.tags,
     {
@@ -132,6 +138,12 @@ resource "aws_instance" "db_servers" {
     id = aws_launch_template.db_servers.id
   }
 
+  # Ensure root block device is encrypted
+  root_block_device {
+    encrypted  = true
+    kms_key_id = var.kms_key_id
+  }
+
   tags = merge(
     var.tags,
     {
@@ -196,6 +208,12 @@ resource "aws_instance" "file_servers" {
   # Reference launch template
   launch_template {
     id = aws_launch_template.file_servers.id
+  }
+
+  # Ensure root block device is encrypted
+  root_block_device {
+    encrypted  = true
+    kms_key_id = var.kms_key_id
   }
 
   tags = merge(

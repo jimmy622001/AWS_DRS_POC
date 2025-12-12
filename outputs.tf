@@ -97,3 +97,24 @@ output "data_protection_dlp_findings_bucket" {
   description = "S3 bucket for DLP findings"
   value       = module.data_protection.dlp_findings_bucket
 }
+
+# On-Demand Security outputs
+output "waf_web_acl_arn" {
+  description = "ARN of the WAF WebACL for DR security"
+  value       = module.on_demand_security.web_acl_arn
+}
+
+output "guardduty_detector_id" {
+  description = "ID of the GuardDuty detector that activates during DR failover"
+  value       = module.on_demand_security.guardduty_detector_id
+}
+
+output "enable_security_lambda_arn" {
+  description = "ARN of the Lambda function for enabling security services"
+  value       = module.on_demand_security.enable_security_lambda_arn
+}
+
+output "disable_security_lambda_arn" {
+  description = "ARN of the Lambda function for disabling security services"
+  value       = module.on_demand_security.disable_security_lambda_arn
+}

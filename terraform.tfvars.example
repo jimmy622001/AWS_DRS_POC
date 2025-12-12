@@ -86,3 +86,6 @@ sns_topic_arn = "arn:aws:sns:eu-west-1:ACCOUNT_ID:topic-name"
 # Single-region DR solution
 # This solution is configured as a DR for on-premises workloads
 # and does not require cross-region failover
+
+# On-Demand Security variables
+create_shield_protection = true

@@ -81,8 +81,8 @@ resource "aws_lb" "dr_lb" {
 resource "aws_lb_target_group" "dr_target_group" {
   count       = var.dr_activated && var.create_load_balancer ? 1 : 0
   name        = "dr-target-group"
-  port        = 80
-  protocol    = "HTTP"
+  port        = 443
+  protocol    = "HTTPS"
   vpc_id      = var.vpc_id
   target_type = "instance"
 
@@ -94,7 +94,7 @@ resource "aws_lb_target_group" "dr_target_group" {
     healthy_threshold   = 3
     unhealthy_threshold = 3
     timeout             = 5
-    protocol            = "HTTP"
+    protocol            = "HTTPS"
     matcher             = "200"
   }
 }
@@ -102,8 +102,10 @@ resource "aws_lb_target_group" "dr_target_group" {
 resource "aws_lb_listener" "dr_listener" {
   count             = var.dr_activated && var.create_load_balancer ? 1 : 0
   load_balancer_arn = aws_lb.dr_lb[0].arn
-  port              = 80
-  protocol          = "HTTP"
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.certificate_arn
 
   default_action {
     type             = "forward"
@@ -115,5 +117,5 @@ resource "aws_lb_target_group_attachment" "dr_target_group_attachment" {
   count            = var.dr_activated && var.create_load_balancer ? var.instance_count : 0
   target_group_arn = aws_lb_target_group.dr_target_group[0].arn
   target_id        = aws_instance.dr_instances[count.index].id
-  port             = 80
+  port             = 443
 }

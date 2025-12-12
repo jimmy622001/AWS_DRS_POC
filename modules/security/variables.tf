@@ -11,7 +11,7 @@ variable "subnet_ids" {
 variable "allowed_ips" {
   description = "List of CIDR blocks allowed to access resources"
   type        = list(string)
-  default     = ["0.0.0.0/0"] # Default to all, but should be overridden with specific IPs
+  default     = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"] # Default to private IP ranges only
 }
 
 variable "prefix" {

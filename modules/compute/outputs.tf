@@ -27,3 +27,8 @@ output "target_group_arn" {
   description = "ARN of the target group"
   value       = var.dr_activated && var.create_load_balancer ? aws_lb_target_group.dr_target_group[0].arn : null
 }
+
+output "load_balancer_arn" {
+  description = "ARN of the load balancer"
+  value       = var.dr_activated && var.create_load_balancer ? aws_lb.dr_lb[0].arn : null
+}

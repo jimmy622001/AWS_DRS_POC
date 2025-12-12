@@ -93,6 +93,7 @@ module "compute" {
   max_size             = var.max_size
   desired_capacity     = var.desired_capacity
   create_load_balancer = var.create_load_balancer
+  certificate_arn      = var.certificate_arn
 }
 
 # KMS Module for encryption
@@ -295,6 +296,25 @@ module "logging" {
   }
 }
 
+# On-Demand Security Module
+module "on_demand_security" {
+  source = "./modules/on_demand_security"
+
+  environment       = var.environment
+  load_balancer_arn = module.compute.load_balancer_arn
+  waf_web_acl_name  = "${var.project}-${var.environment}-dr-waf"
+
+  # Shield Advanced Configuration
+  create_shield_protection = var.create_shield_protection && module.compute.load_balancer_arn != null
+  shield_resource_arn      = module.compute.load_balancer_arn != null ? module.compute.load_balancer_arn : ""
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+    Component   = "DR-Security"
+  }
+}
+
 # Recovery Orchestration Module
 module "recovery_orchestration" {
   source = "./modules/recovery_orchestration"
@@ -312,6 +332,8 @@ module "recovery_orchestration" {
     var.db_server_source_ids,
     var.file_server_source_ids
   )
+  enable_security_lambda_arn  = module.on_demand_security.enable_security_lambda_arn
+  disable_security_lambda_arn = module.on_demand_security.disable_security_lambda_arn
 }
 
 # Data Protection Module

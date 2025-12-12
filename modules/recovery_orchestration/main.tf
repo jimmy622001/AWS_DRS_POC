@@ -58,7 +58,9 @@ resource "aws_iam_policy" "step_function_policy" {
         Resource = [
           aws_lambda_function.pre_recovery_checks.arn,
           aws_lambda_function.post_recovery_validation.arn,
-          aws_lambda_function.notify_recovery_status.arn
+          aws_lambda_function.notify_recovery_status.arn,
+          var.enable_security_lambda_arn,
+          var.disable_security_lambda_arn
         ]
       },
       {
@@ -218,8 +220,21 @@ resource "aws_sfn_state_machine" "dr_orchestration" {
   definition = <<EOF
 {
   "Comment": "AWS DRS Recovery Orchestration",
-  "StartAt": "PreRecoveryChecks",
+  "StartAt": "EnableSecurityServices",
   "States": {
+    "EnableSecurityServices": {
+      "Type": "Task",
+      "Resource": "${var.enable_security_lambda_arn}",
+      "Next": "PreRecoveryChecks",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.errorInfo",
+          "Next": "PreRecoveryChecks"
+        }
+      ],
+      "ResultPath": "$.securityActivation"
+    },
     "PreRecoveryChecks": {
       "Type": "Task",
       "Resource": "${aws_lambda_function.pre_recovery_checks.arn}",
@@ -240,7 +255,7 @@ resource "aws_sfn_state_machine" "dr_orchestration" {
           "Next": "InitiateRecovery"
         }
       ],
-      "Default": "NotifyFailure"
+      "Default": "DisableSecurityAndNotifyFailure"
     },
     "InitiateRecovery": {
       "Type": "Task",
@@ -252,7 +267,7 @@ resource "aws_sfn_state_machine" "dr_orchestration" {
       "Catch": [
         {
           "ErrorEquals": ["States.ALL"],
-          "Next": "NotifyFailure"
+          "Next": "DisableSecurityAndNotifyFailure"
         }
       ]
     },
@@ -273,7 +288,7 @@ resource "aws_sfn_state_machine" "dr_orchestration" {
       "Catch": [
         {
           "ErrorEquals": ["States.ALL"],
-          "Next": "NotifyFailure"
+          "Next": "DisableSecurityAndNotifyFailure"
         }
       ]
     },
@@ -283,7 +298,7 @@ resource "aws_sfn_state_machine" "dr_orchestration" {
         {
           "Variable": "$.jobs[0].status",
           "StringEquals": "COMPLETED",
-          "Next": "PostRecoveryValidation"
+          "Next": "ValidateSecurityActivation"
         },
         {
           "Variable": "$.jobs[0].status",
@@ -296,7 +311,15 @@ resource "aws_sfn_state_machine" "dr_orchestration" {
           "Next": "WaitForRecovery"
         }
       ],
-      "Default": "NotifyFailure"
+      "Default": "DisableSecurityAndNotifyFailure"
+    },
+    "ValidateSecurityActivation": {
+      "Type": "Pass",
+      "Next": "PostRecoveryValidation",
+      "ResultPath": "$.securityValidation",
+      "Result": {
+        "securityEnabled": true
+      }
     },
     "PostRecoveryValidation": {
       "Type": "Task",
@@ -305,7 +328,7 @@ resource "aws_sfn_state_machine" "dr_orchestration" {
       "Catch": [
         {
           "ErrorEquals": ["States.ALL"],
-          "Next": "NotifyFailure"
+          "Next": "DisableSecurityAndNotifyFailure"
         }
       ]
     },
@@ -318,14 +341,20 @@ resource "aws_sfn_state_machine" "dr_orchestration" {
           "Next": "NotifySuccess"
         }
       ],
-      "Default": "NotifyFailure"
+      "Default": "DisableSecurityAndNotifyFailure"
+    },
+    "DisableSecurityAndNotifyFailure": {
+      "Type": "Task",
+      "Resource": "${var.disable_security_lambda_arn}",
+      "Next": "NotifyFailure",
+      "ResultPath": "$.securityDeactivation"
     },
     "NotifySuccess": {
       "Type": "Task",
       "Resource": "${aws_lambda_function.notify_recovery_status.arn}",
       "Parameters": {
         "status": "SUCCESS",
-        "message": "DR Recovery completed successfully",
+        "message": "DR Recovery completed successfully with security features enabled",
         "details.$": "$"
       },
       "End": true

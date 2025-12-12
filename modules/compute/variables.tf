@@ -57,3 +57,8 @@ variable "create_load_balancer" {
   description = "Flag to determine if a load balancer should be created"
   type        = bool
 }
+
+variable "certificate_arn" {
+  description = "ARN of the SSL certificate for HTTPS listener"
+  type        = string
+}
