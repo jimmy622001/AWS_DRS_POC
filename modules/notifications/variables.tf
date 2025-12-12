@@ -17,7 +17,25 @@ variable "topic_arn" {
 }
 
 variable "admin_email" {
-  description = "Email address for admin notifications"
+  description = "Email address for standard admin notifications"
+  type        = string
+  default     = ""
+}
+
+variable "critical_admin_email" {
+  description = "Email address for critical admin notifications (typically used for urgent DR alerts)"
+  type        = string
+  default     = ""
+}
+
+variable "create_critical_topic" {
+  description = "Whether to create a separate critical notifications SNS topic"
+  type        = bool
+  default     = true
+}
+
+variable "critical_topic_name" {
+  description = "Name of the critical SNS topic. If not provided, will be generated using the prefix"
   type        = string
   default     = ""
 }

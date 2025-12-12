@@ -21,12 +21,15 @@ data "aws_region" "current" {}
 module "notifications" {
   source = "./modules/notifications"
 
-  create_topic = var.create_sns_topic
-  topic_name   = var.sns_topic_name != "" ? var.sns_topic_name : "${var.project}-${var.environment}-dr-notifications"
-  admin_email  = var.admin_email
-  prefix       = "${var.project}-${var.environment}"
-  environment  = var.environment
-  kms_key_id   = module.kms.key_id
+  create_topic          = var.create_sns_topic
+  topic_name            = var.sns_topic_name != "" ? var.sns_topic_name : "${var.project}-${var.environment}-dr-notifications"
+  admin_email           = var.admin_email
+  create_critical_topic = true
+  critical_topic_name   = "${var.project}-${var.environment}-critical-dr-notifications"
+  critical_admin_email  = var.critical_admin_email
+  prefix                = "${var.project}-${var.environment}"
+  environment           = var.environment
+  kms_key_id            = module.kms.key_id
 
   tags = {
     Environment = var.environment
@@ -232,10 +235,12 @@ module "monitoring" {
   source = "./modules/monitoring"
 
   aws_region                        = var.aws_region
-  source_server_ids                 = var.monitoring_source_server_ids
+  critical_source_server_ids        = var.critical_source_server_ids
+  standard_source_server_ids        = var.standard_source_server_ids
   replication_lag_threshold_seconds = var.replication_lag_threshold_seconds
   rto_threshold_minutes             = var.rto_threshold_minutes
   sns_topic_arn                     = module.notifications.topic_arn
+  critical_sns_topic_arn            = module.notifications.critical_topic_arn
 }
 
 

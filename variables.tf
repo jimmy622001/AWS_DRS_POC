@@ -24,13 +24,24 @@ variable "allowed_ips" {
 }
 
 variable "admin_email" {
-  description = "Email address for security notifications and alerts"
+  description = "Email address for standard security notifications and alerts"
   type        = string
   default     = null
 
   validation {
     condition     = var.admin_email == null || can(regex("^[^@]+@[^@]+$", var.admin_email))
     error_message = "The admin_email must be a valid email address or null."
+  }
+}
+
+variable "critical_admin_email" {
+  description = "Email address for critical DR notifications and alerts"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.critical_admin_email == null || can(regex("^[^@]+@[^@]+$", var.critical_admin_email))
+    error_message = "The critical_admin_email must be a valid email address or null."
   }
 }
 
@@ -367,9 +378,16 @@ variable "file_server_source_ids" {
 }
 
 # Monitoring variables
-variable "monitoring_source_server_ids" {
-  description = "List of DRS source server IDs to monitor"
+variable "critical_source_server_ids" {
+  description = "List of critical DRS source server IDs to monitor with stricter thresholds"
   type        = list(string)
+  default     = []
+}
+
+variable "standard_source_server_ids" {
+  description = "List of standard DRS source server IDs to monitor with regular thresholds"
+  type        = list(string)
+  default     = []
 }
 
 variable "replication_lag_threshold_seconds" {

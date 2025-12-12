@@ -8,6 +8,70 @@ resource "aws_vpc" "dr_vpc" {
   }
 }
 
+# Enhanced VPC Flow Logs directly to CloudWatch Logs for security monitoring
+resource "aws_flow_log" "enhanced_vpc_flow_logs" {
+  log_destination          = aws_cloudwatch_log_group.enhanced_vpc_flow_logs.arn
+  log_destination_type     = "cloud-watch-logs"
+  traffic_type             = "ALL"
+  vpc_id                   = aws_vpc.dr_vpc.id
+  iam_role_arn             = aws_iam_role.enhanced_vpc_flow_logs.arn
+  max_aggregation_interval = 60 # 1-minute intervals for more detailed monitoring
+
+  tags = {
+    Name        = "dr-enhanced-vpc-flow-logs"
+    Environment = "DR"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "enhanced_vpc_flow_logs" {
+  name              = "/aws/vpc/enhanced-flowlogs/dr-vpc"
+  retention_in_days = 90
+
+  tags = {
+    Name        = "dr-enhanced-vpc-flow-logs"
+    Environment = "DR"
+  }
+}
+
+resource "aws_iam_role" "enhanced_vpc_flow_logs" {
+  name = "dr-enhanced-vpc-flow-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "enhanced_vpc_flow_logs" {
+  name = "dr-enhanced-vpc-flow-logs-policy"
+  role = aws_iam_role.enhanced_vpc_flow_logs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ],
+        Resource = "${aws_cloudwatch_log_group.enhanced_vpc_flow_logs.arn}:*"
+      }
+    ]
+  })
+}
+
 resource "aws_subnet" "dr_private_subnets" {
   count             = length(var.private_subnet_cidrs)
   vpc_id            = aws_vpc.dr_vpc.id

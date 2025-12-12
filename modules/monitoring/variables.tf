@@ -3,9 +3,22 @@ variable "aws_region" {
   type        = string
 }
 
-variable "source_server_ids" {
-  description = "List of DRS source server IDs to monitor"
+variable "critical_source_server_ids" {
+  description = "List of critical DRS source server IDs to monitor with stricter thresholds"
   type        = list(string)
+  default     = []
+}
+
+variable "standard_source_server_ids" {
+  description = "List of standard DRS source server IDs to monitor"
+  type        = list(string)
+  default     = []
+}
+
+variable "source_server_ids" {
+  description = "List of all DRS source server IDs to monitor (legacy - use critical_source_server_ids and standard_source_server_ids instead)"
+  type        = list(string)
+  default     = []
 }
 
 variable "replication_lag_threshold_seconds" {
@@ -19,6 +32,12 @@ variable "rto_threshold_minutes" {
 }
 
 variable "sns_topic_arn" {
-  description = "ARN of the SNS topic for alarms"
+  description = "ARN of the SNS topic for standard alarms"
   type        = string
+}
+
+variable "critical_sns_topic_arn" {
+  description = "ARN of the SNS topic for critical alarms"
+  type        = string
+  default     = ""
 }
