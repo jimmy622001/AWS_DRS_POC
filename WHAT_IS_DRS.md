@@ -39,4 +39,9 @@ After the disaster is resolved, you can replicate the changes back to your origi
 - EC2 instances are launched only during failover/recovery
 - This approach minimizes costs while ensuring rapid recovery
 
-For more detailed information about our AWS DRS implementation, please refer to the documentation in the `docs/` directory, particularly [Solution Overview](docs/01-solution-overview.md) and [DRS-proposal.md](DRS-proposal.md).
+For more detailed information about our AWS DRS implementation, please refer to:
+
+- [Solution Overview](docs/01-solution-overview.md) - Complete overview of our DRS solution
+- [Architecture Details](docs/architecture.md) - Technical architecture and implementation specifics
+- [Recovery Runbooks](docs/40-recovery-runbooks.md) - Detailed procedures for disaster recovery
+- [Deployment Guide](docs/21-deployment-guide.md) - Step-by-step implementation instructions
